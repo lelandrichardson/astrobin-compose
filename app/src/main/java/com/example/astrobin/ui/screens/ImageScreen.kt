@@ -1,10 +1,13 @@
 package com.example.astrobin.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.layout.ContentScale
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.LocalAstrobinApi
 
@@ -22,7 +25,10 @@ fun ImageScreen(
   } else {
     Column {
       Text(text = data.title)
-      Text(data.url_gallery)
+      Image(
+        painter = rememberImagePainter(data.url_regular),
+        contentDescription = data.dec,
+      )
     }
   }
 }
