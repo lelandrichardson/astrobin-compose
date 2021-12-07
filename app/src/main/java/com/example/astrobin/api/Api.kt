@@ -15,8 +15,8 @@ interface AstrobinApi {
   @GET("userprofile/{id}/")
   suspend fun user(@Path("id") id: Int): AstroUser
 
-  @GET("userprofile/{id}/")
-  suspend fun user(@Path("username") username: String): ListResponse<AstroUser>
+  @GET("userprofile/")
+  suspend fun user(@Query("username") username: String): ListResponse<AstroUser>
 
   @GET("image/{hash}/")
   suspend fun image(@Path("hash") hash: String): AstroImage
@@ -116,7 +116,9 @@ data class AstroImage(
   @field:Json(name="link_to_fits") val link_to_fits: String?,
   @field:Json(name="resource_uri") val resource_uri: String,
   @field:Json(name="revisions") val revisions: List<String>,
-)
+) {
+  val aspectRatio: Float get() = w.toFloat() / h.toFloat()
+}
 
 data class AstroUser(
   @field:Json(name="id") val id: Int,
@@ -131,14 +133,14 @@ data class AstroUser(
   @field:Json(name="image_count") val image_count: Int,
 
   // bio
-  @field:Json(name="about") val about: String,
+  @field:Json(name="about") val about: String?,
   @field:Json(name="hobbies") val hobbies: String?,
   @field:Json(name="website") val website: String?,
-  @field:Json(name="job") val job: String,
+  @field:Json(name="job") val job: String?,
 
   @field:Json(name="date_joined") val date_joined: String,
   @field:Json(name="language") val language: String,
-  @field:Json(name="avatar") val avatar: String,
+  @field:Json(name="avatar") val avatar: String?,
   @field:Json(name="resource_uri") val resource_uri: String,
 )
 
