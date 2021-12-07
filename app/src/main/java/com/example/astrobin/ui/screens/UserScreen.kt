@@ -60,6 +60,7 @@ private fun UserScreenContent(user: AstroUser, nav: NavController) {
   Column(
     modifier = Modifier.fillMaxWidth()
   ) {
+    Spacer(modifier = Modifier.height(16.dp))
     val avatarPainter =
       user.avatar?.let { rememberImagePainter(it) } ?: ColorPainter(Color.LightGray)
     Image(
@@ -78,7 +79,7 @@ private fun UserScreenContent(user: AstroUser, nav: NavController) {
       fontSize = 32.sp
     )
     Text(
-      text = user.username,
+      text = "@${user.username}",
       modifier = Modifier.align(Alignment.CenterHorizontally),
     )
     Row(
@@ -125,31 +126,35 @@ private fun UserImages(userImages: List<AstroImage>,   nav: NavController) {
     modifier = Modifier.fillMaxSize(),
   ) {
     items(userImages) { image ->
-      Box {
-        Column(
-          Modifier.fillMaxWidth()
-        ) {
-          Image(
-            painter = rememberImagePainter(image.url_regular),
-            contentDescription = image.title,
-            contentScale = ContentScale.FillWidth,
-            // Bug here if I don't specify a size, I want fillWidth(). :(
-            modifier = Modifier
-              .size(width = 300.dp, height = 200.dp) // 3:2 ratio
-              .align(Alignment.CenterHorizontally)
-              .clickable {
-                nav.navigate("image/${image.hash}")
-              },
+      Column {
+        Box {
+          Column(
+            Modifier.fillMaxWidth()
+          ) {
+            Image(
+              painter = rememberImagePainter(image.url_regular),
+              contentDescription = image.title,
+              contentScale = ContentScale.FillWidth,
+              // Bug here if I don't specify a size, I want fillWidth(). :(
+              modifier = Modifier
+                .size(width = 300.dp, height = 200.dp) // 3:2 ratio
+                .align(Alignment.CenterHorizontally)
+                .border(2.dp, Color.DarkGray)
+                .clickable {
+                  nav.navigate("image/${image.hash}")
+                },
+            )
+          }
+          Text(
+            text = image.title,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.align(Alignment.BottomCenter)
           )
         }
-        Text(
-          text = image.title,
-          color = Color.White,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          modifier = Modifier.align(Alignment.BottomCenter)
-        )
       }
+      Spacer(modifier = Modifier.height(8.dp))
     }
   }
 }

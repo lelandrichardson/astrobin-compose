@@ -63,7 +63,7 @@ fun ImageScreen(
 
         Text(data.title, style = MaterialTheme.typography.h1)
         if (user != null) {
-          UserRow(user)
+          UserRow(user, nav)
         } else {
           CircularProgressIndicator(
             Modifier
@@ -116,8 +116,14 @@ fun ImageScreen(
   }
 }
 
-@Composable fun UserRow(user: AstroUser) {
-  Row {
+@Composable fun UserRow(user: AstroUser, nav: NavController) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable {
+        nav.navigate("user/${user.id}")
+      }
+  ) {
     Box(
       Modifier
         .border(4.dp, MaterialTheme.colors.primary, CircleShape)
