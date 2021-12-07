@@ -19,6 +19,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.ImageLoader
+import coil.compose.LocalImageLoader
 import com.example.astrobin.api.AstrobinApi
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.ui.Routes
@@ -28,8 +30,11 @@ import com.example.astrobin.ui.screens.TopScreen
 import com.example.astrobin.ui.screens.UserScreen
 import com.example.astrobin.ui.theme.AstrobinTheme
 
-@Composable fun Astrobin(api: AstrobinApi) {
-  CompositionLocalProvider(LocalAstrobinApi provides api) {
+@Composable fun Astrobin(api: AstrobinApi, imageLoader: ImageLoader) {
+  CompositionLocalProvider(
+    LocalAstrobinApi provides api,
+    LocalImageLoader provides imageLoader
+  ) {
     AstrobinTheme {
       val nav = rememberNavController()
       Scaffold(
