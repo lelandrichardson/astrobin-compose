@@ -72,16 +72,16 @@ data class AstroImage(
   // astrometry
   @field:Json(name="is_solved") val is_solved: Boolean,
   @field:Json(name="solution_status") val solution_status: String,
-  @field:Json(name="ra") val ra: String, // float
-  @field:Json(name="dec") val dec: String, // Float
-  @field:Json(name="pixscale") val pixscale: String, // Float
-  @field:Json(name="radius") val radius: String, // float
-  @field:Json(name="orientation") val orientation: String, // Float
+  @field:Json(name="ra") val ra: String?, // float
+  @field:Json(name="dec") val dec: String?, // Float
+  @field:Json(name="pixscale") val pixscale: String?, // Float
+  @field:Json(name="radius") val radius: String?, // float
+  @field:Json(name="orientation") val orientation: String?, // Float
   @field:Json(name="w") val w: Int,
   @field:Json(name="h") val h: Int,
 
   // images
-  @field:Json(name="url_advanced_solution") val url_advanced_solution: String,
+  @field:Json(name="url_advanced_solution") val url_advanced_solution: String?,
   @field:Json(name="url_duckduckgo") val url_duckduckgo: String,
   @field:Json(name="url_duckduckgo_small") val url_duckduckgo_small: String,
   @field:Json(name="url_gallery") val url_gallery: String,
@@ -89,8 +89,8 @@ data class AstroImage(
   @field:Json(name="url_histogram") val url_histogram: String,
   @field:Json(name="url_real") val url_real: String,
   @field:Json(name="url_regular") val url_regular: String,
-  @field:Json(name="url_skyplot") val url_skyplot: String,
-  @field:Json(name="url_solution") val url_solution: String,
+  @field:Json(name="url_skyplot") val url_skyplot: String?,
+  @field:Json(name="url_solution") val url_solution: String?,
   @field:Json(name="url_thumb") val url_thumb: String,
 
   // statistics

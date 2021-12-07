@@ -93,13 +93,15 @@ fun ImageScreen(
       }
       // description?
 
-      Section("Sky Plot") {
-        Image(
-          modifier = Modifier.fillMaxWidth().aspectRatio(1f),
-          painter = rememberImagePainter(data.url_skyplot),
-          contentScale = ContentScale.FillWidth,
-          contentDescription = "Sky Plot",
-        )
+      if (data.url_skyplot != null) {
+        Section("Sky Plot") {
+          Image(
+            modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+            painter = rememberImagePainter(data.url_skyplot),
+            contentScale = ContentScale.FillWidth,
+            contentDescription = "Sky Plot",
+          )
+        }
       }
 
       Section("Histogram") {
@@ -189,11 +191,13 @@ fun ImageScreen(
 
 @Composable fun TechCardItem(
   key: String,
-  value: String,
+  value: String?,
 ) {
-  Row {
-    Text(key, fontWeight = FontWeight.Bold)
-    Text(": ")
-    Text(value)
+  if (value != null) {
+    Row {
+      Text(key, fontWeight = FontWeight.Bold)
+      Text(": ")
+      Text(value)
+    }
   }
 }

@@ -82,7 +82,7 @@ private fun UserScreenContent(user: AstroUser?) {
             value = api.imageSearch(
                 limit = 0,
                 offset = 0,
-                mapOf("username" to user.username)
+                mapOf("user" to user.username)
             ).objects
         }.value
         UserImages(userImages)
@@ -95,7 +95,7 @@ private fun UserImages(userImages: List<AstroImage>) {
   for (image in userImages) {
     Image(
       painter = rememberImagePainter(image.url_regular),
-      contentDescription = image.dec
+      contentDescription = image.title
     )
   }
 }
