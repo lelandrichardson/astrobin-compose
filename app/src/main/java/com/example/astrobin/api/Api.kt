@@ -52,11 +52,20 @@ data class ListResponse<T>(
   @field:Json(name="objects") val objects: List<T>,
 )
 
+private fun imageUrl(hash: String, type: String) = "https://www.astrobin.com/$hash/0/rawthumb/$type/"
+
 data class TopPick(
   @field:Json(name="date") val date: String,
   @field:Json(name="image") val image: String,
   @field:Json(name="resource_uri") val resource_uri: String
-)
+) {
+  val hash: String get() = image.substringAfterLast('/')
+  val url_regular: String get() = imageUrl(hash, "regular")
+  val url_thumb: String get() = imageUrl(hash, "thumb")
+  val url_real: String get() = imageUrl(hash, "real")
+  val url_gallery: String get() = imageUrl(hash, "gallery")
+  val url_hd: String get() = imageUrl(hash, "hd")
+}
 
 data class AstroImage(
   @field:Json(name="id") val id: Int,
@@ -123,7 +132,7 @@ data class AstroImage(
 data class AstroUser(
   @field:Json(name="id") val id: Int,
   @field:Json(name="username") val username: String,
-  @field:Json(name="real_name") val real_name: String,
+  @field:Json(name="real_name") val real_name: String?,
 
   // stats
   @field:Json(name="followers_count") val followers_count: Int,
@@ -142,7 +151,9 @@ data class AstroUser(
   @field:Json(name="language") val language: String,
   @field:Json(name="avatar") val avatar: String?,
   @field:Json(name="resource_uri") val resource_uri: String,
-)
+) {
+  val display_name: String get() = real_name ?: "@$username"
+}
 
 data class AstroResultsMeta(
   @field:Json(name="limit") val limit: Int,

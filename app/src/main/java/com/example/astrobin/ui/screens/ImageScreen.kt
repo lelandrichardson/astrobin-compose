@@ -20,9 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.astrobin.api.AstroImage
-import com.example.astrobin.api.AstroUser
-import com.example.astrobin.api.LocalAstrobinApi
+import com.example.astrobin.api.*
 import com.google.accompanist.flowlayout.FlowRow
 
 @Composable
@@ -106,14 +104,58 @@ fun ImageScreen(
 
       Section("Histogram") {
         Image(
-          modifier = Modifier.fillMaxWidth().aspectRatio(274f / 120f),
+          modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(274f / 120f),
           painter = rememberImagePainter(data.url_histogram),
           contentScale = ContentScale.FillWidth,
           contentDescription = "Histogram",
         )
       }
+
+      Section("Nearby Images") {
+//        val nearby = produceState<ListResponse<AstroImage>?>(initialValue = null) {
+//          value = api.nearby(
+//            data.dec.toFloat(),
+//            data.ra.toFloat(),
+//            data.radius.toFloat(),
+//            limit = 10,
+//            offset = 0,
+//          )
+//        }.value
+//        if (nearby != null) {
+//          Column {
+//            for (image in nearby.objects) {
+//              Text(image.resource_uri)
+//            }
+//          }
+//        }
+      }
     }
   }
+}
+
+suspend fun AstrobinApi.nearby(
+  dec: Float,
+  ra: Float,
+  radius: Float,
+  limit: Int,
+  offset: Int,
+): ListResponse<AstroImage> {
+  return imageSearch(
+    limit,
+    offset,
+    mapOf(
+      "ra__lt" to "${ra + radius}",
+      "ra__gt" to "${ra - radius}",
+      "dec__lt" to "${dec + radius}",
+      "dec__gt" to "${dec - radius}",
+    )
+  )
+}
+
+@Composable fun ImageCarousel() {
+
 }
 
 @Composable fun UserRow(user: AstroUser, nav: NavController) {
@@ -132,7 +174,7 @@ fun ImageScreen(
         .size(28.dp)
     )
     Column(Modifier.padding(start=10.dp)) {
-      Text(user.real_name, style=MaterialTheme.typography.subtitle1)
+      Text(user.display_name, style=MaterialTheme.typography.subtitle1)
       Row {
         IconCount(
           user.followers_count,

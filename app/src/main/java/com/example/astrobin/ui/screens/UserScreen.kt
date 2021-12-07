@@ -20,9 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
-import com.example.astrobin.R
 import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.AstroUser
 import com.example.astrobin.api.LocalAstrobinApi
@@ -38,13 +35,14 @@ import com.example.astrobin.api.LocalAstrobinApi
 @Composable
 fun UserScreen(
   id: Int,
+  padding: PaddingValues,
   nav: NavController
 ) {
   val api = LocalAstrobinApi.current
-  val data = produceState<AstroUser?>(null) {
+  val user = produceState<AstroUser?>(null) {
     value = api.user(id)
   }.value
-  if (data == null) {
+  if (user == null) {
     Column(
       modifier = Modifier.fillMaxWidth()
     ) {
@@ -54,12 +52,30 @@ fun UserScreen(
       )
     }
   } else {
-    UserScreenContent(data, nav)
+    val userImages = produceState(emptyList<AstroImage>()) {
+      value = api.imageSearch(
+        limit = 0,
+        offset = 0,
+        mapOf("user" to user.username)
+      ).objects
+    }.value ?: emptyList()
+    LazyColumn(
+      modifier = Modifier.fillMaxSize(),
+      contentPadding = padding,
+    ) {
+      item {
+        UserHeaderContent(user, nav)
+      }
+      items(userImages) {
+        UserImageRow(it, nav)
+        Spacer(modifier = Modifier.height(8.dp))
+      }
+    }
   }
 }
 
 @Composable
-private fun UserScreenContent(user: AstroUser, nav: NavController) {
+private fun UserHeaderContent(user: AstroUser, nav: NavController) {
   Column(
     modifier = Modifier.fillMaxWidth()
   ) {
@@ -77,7 +93,7 @@ private fun UserScreenContent(user: AstroUser, nav: NavController) {
         .border(2.dp, Color.Black, CircleShape)
     )
     Text(
-      text = user.real_name,
+      text = user.display_name,
       modifier = Modifier.align(Alignment.CenterHorizontally),
       fontSize = 32.sp
     )
@@ -109,56 +125,32 @@ private fun UserScreenContent(user: AstroUser, nav: NavController) {
     if (user.about != null) {
       Text("${user.about}")
     }
-
-    // TODO: Gotta paginate!
-    val api = LocalAstrobinApi.current
-    val userImages = produceState(emptyList<AstroImage>()) {
-      value = api.imageSearch(
-        limit = 0,
-        offset = 0,
-        mapOf("user" to user.username)
-      ).objects
-    }.value
-    UserImages(userImages, nav)
   }
 }
 
 @Composable
-private fun UserImages(userImages: List<AstroImage>,   nav: NavController) {
-  LazyColumn(
-    modifier = Modifier.fillMaxSize(),
-  ) {
-    items(userImages) { image ->
-      Column {
-        Box {
-          Column(
-            Modifier.fillMaxWidth()
-          ) {
-            Image(
-              painter = rememberImagePainter(image.url_regular),
-              contentDescription = image.title,
-              contentScale = ContentScale.FillWidth,
-              // Bug here if I don't specify a size, I want fillWidth(). :(
-              modifier = Modifier
-                .size(width = 300.dp, height = 200.dp) // 3:2 ratio
-                .align(Alignment.CenterHorizontally)
-                .border(2.dp, Color.DarkGray)
-                .clickable {
-                  nav.navigate("image/${image.hash}")
-                },
-            )
-          }
-          Text(
-            text = image.title,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.align(Alignment.BottomCenter)
-          )
-        }
-      }
-      Spacer(modifier = Modifier.height(8.dp))
-    }
+private fun UserImageRow(image: AstroImage, nav: NavController) {
+  Box {
+    Image(
+      painter = rememberImagePainter(image.url_regular),
+      contentDescription = image.title,
+      contentScale = ContentScale.FillWidth,
+      // Bug here if I don't specify a size, I want fillWidth(). :(
+      modifier = Modifier
+        .fillMaxWidth()
+        .aspectRatio(16f / 9f)
+        .border(2.dp, Color.DarkGray)
+        .clickable {
+          nav.navigate("image/${image.hash}")
+        },
+    )
+    Text(
+      text = image.title,
+      color = Color.White,
+      maxLines = 1,
+      overflow = TextOverflow.Ellipsis,
+      modifier = Modifier.align(Alignment.BottomCenter),
+    )
   }
 }
 
@@ -183,5 +175,5 @@ fun UserScreenPreview() {
     avatar = null,
     resource_uri = "/api/v1/userprofile/12345/"
   )
-  UserScreenContent(data, rememberNavController())
+  UserHeaderContent(data, rememberNavController())
 }

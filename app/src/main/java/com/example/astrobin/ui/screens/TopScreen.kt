@@ -1,16 +1,30 @@
 package com.example.astrobin.ui.screens
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.ListResponse
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.api.TopPick
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 
 @Composable
 fun TopScreen(
+  padding: PaddingValues,
   nav: NavController
 ) {
   val api = LocalAstrobinApi.current
@@ -20,10 +34,32 @@ fun TopScreen(
   if (data == null) {
     Text(text = "Loading...")
   } else {
-    Column {
-      for (image in data.objects) {
-        Text(image.image)
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
+      item { Text("Top Picks", style = MaterialTheme.typography.h1) }
+      items(data.objects) {
+        TopPickRow(it, nav)
+        Spacer(Modifier.height(8.dp))
       }
     }
+  }
+}
+
+
+@Composable fun TopPickRow(image: TopPick, nav: NavController) {
+  Column(Modifier.fillMaxWidth()) {
+    Image(
+      painter = rememberImagePainter(image.url_regular),
+      contentDescription = "",
+      contentScale = ContentScale.FillWidth,
+      // Bug here if I don't specify a size, I want fillWidth(). :(
+      modifier = Modifier
+        .fillMaxWidth()
+        .aspectRatio(16f / 9f)
+        .align(Alignment.CenterHorizontally)
+        .border(2.dp, Color.DarkGray)
+        .clickable {
+          nav.navigate("image/${image.hash}")
+        },
+    )
   }
 }

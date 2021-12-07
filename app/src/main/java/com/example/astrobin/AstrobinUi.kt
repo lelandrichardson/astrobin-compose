@@ -1,7 +1,8 @@
 package com.example.astrobin
 
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -11,7 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -29,26 +37,32 @@ import com.example.astrobin.ui.screens.SearchScreen
 import com.example.astrobin.ui.screens.TopScreen
 import com.example.astrobin.ui.screens.UserScreen
 import com.example.astrobin.ui.theme.AstrobinTheme
+import com.example.astrobin.ui.theme.DarkBlue
+import com.example.astrobin.ui.theme.Yellow
 
 @Composable fun Astrobin(api: AstrobinApi, imageLoader: ImageLoader) {
   CompositionLocalProvider(
     LocalAstrobinApi provides api,
     LocalImageLoader provides imageLoader
   ) {
+    val nav = rememberNavController()
     AstrobinTheme {
-      val nav = rememberNavController()
-      Scaffold(
-        bottomBar = { AstrobinBottomNav(nav) }
-      ) { innerPadding ->
-        NavHost(nav, startDestination = "home", Modifier.padding(innerPadding)) {
+      AstroAppWindow(
+        Modifier.fillMaxSize(),
+        top = {},
+        bottom = {
+          AstrobinBottomNav(nav)
+        },
+      ) { padding ->
+        NavHost(nav, startDestination = "home") {
           composable("home") {
-            ImageScreen("nlw5b0", nav)
+            UserScreen(93620, padding, nav)
           }
           composable(
             "user/{id}",
             listOf(navArgument("id") { type = NavType.IntType })
           ) {
-            UserScreen(it.arguments?.getInt("id")!!, nav)
+            UserScreen(it.arguments?.getInt("id")!!, padding, nav)
           }
           composable(
             "image/{hash}",
@@ -60,7 +74,7 @@ import com.example.astrobin.ui.theme.AstrobinTheme
             SearchScreen(nav = nav, entry = it)
           }
           composable(Routes.Top) {
-            TopScreen(nav)
+            TopScreen(padding, nav)
           }
         }
       }
@@ -87,12 +101,17 @@ import com.example.astrobin.ui.theme.AstrobinTheme
         launchSingleTop = true
         restoreState = true
       }
-    }
+    },
+    selectedContentColor = Yellow,
+    unselectedContentColor = Color.White,
   )
 }
 
 @Composable fun AstrobinBottomNav(nav: NavController) {
-  BottomNavigation {
+  BottomNavigation(
+    Modifier.clip(RoundedCornerShape(topStart = 80.dp, topEnd = 80.dp)),
+    backgroundColor = Color.Black,
+  ) {
     val navBackStackEntry by nav.currentBackStackEntryAsState()
     val current = navBackStackEntry?.destination
     AstrobinBottomNavigationItem(
@@ -116,5 +135,64 @@ import com.example.astrobin.ui.theme.AstrobinTheme
       nav = nav,
       current = current
     )
+  }
+}
+
+
+private val mainWindowGradient = Brush.linearGradient(
+  listOf(Color.Black, DarkBlue),
+  start = Offset.Zero,
+  end = Offset(0f, Float.POSITIVE_INFINITY)
+)
+private enum class AstroScaffoldLayoutContent { TopBar, MainContent, BottomBar }
+@Composable fun AstroAppWindow(
+  modifier: Modifier = Modifier,
+  top: @Composable () -> Unit,
+  bottom: @Composable () -> Unit,
+  content: @Composable (PaddingValues) -> Unit
+) {
+  CompositionLocalProvider(
+    LocalContentColor provides Color.White,
+  ) {
+    SubcomposeLayout(
+      modifier.background(mainWindowGradient)
+    ) { constraints ->
+      val layoutWidth = constraints.maxWidth
+      val layoutHeight = constraints.maxHeight
+
+      val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+
+      layout(layoutWidth, layoutHeight) {
+        val topBarPlaceables = subcompose(AstroScaffoldLayoutContent.TopBar, top)
+          .map { it.measure(looseConstraints) }
+
+        val topBarHeight = topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
+
+        val bottomBarPlaceables = subcompose(AstroScaffoldLayoutContent.BottomBar, bottom)
+          .map { it.measure(looseConstraints) }
+
+        val bottomBarHeight = bottomBarPlaceables.maxByOrNull { it.height }?.height ?: 0
+
+        val bodyContentHeight = layoutHeight - topBarHeight
+
+        val bodyContentPlaceables = subcompose(AstroScaffoldLayoutContent.MainContent) {
+          val innerPadding = PaddingValues(bottom = bottomBarHeight.toDp())
+          content(innerPadding)
+        }.map { it.measure(looseConstraints.copy(maxHeight = bodyContentHeight)) }
+
+        // Placing to control drawing order to match default elevation of each placeable
+
+        bodyContentPlaceables.forEach {
+          it.place(0, topBarHeight)
+        }
+        topBarPlaceables.forEach {
+          it.place(0, 0)
+        }
+        // The bottom bar is always at the bottom of the layout
+        bottomBarPlaceables.forEach {
+          it.place(0, layoutHeight - bottomBarHeight)
+        }
+      }
+    }
   }
 }
