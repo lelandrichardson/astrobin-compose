@@ -2,6 +2,7 @@ package com.example.astrobin.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,10 +20,12 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.astrobin.R
 import com.example.astrobin.api.AstroImage
@@ -48,12 +51,12 @@ fun UserScreen(
       )
     }
   } else {
-    UserScreenContent(data)
+    UserScreenContent(data, nav)
   }
 }
 
 @Composable
-private fun UserScreenContent(user: AstroUser) {
+private fun UserScreenContent(user: AstroUser, nav: NavController) {
   Column(
     modifier = Modifier.fillMaxWidth()
   ) {
@@ -84,18 +87,24 @@ private fun UserScreenContent(user: AstroUser) {
       Icon(
         imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_thumb_up_24),
         contentDescription = "like icon",
-        modifier = Modifier.size(24.dp).padding(2.dp)
+        modifier = Modifier
+          .size(24.dp)
+          .padding(2.dp)
       )
       Text("${user.received_likes_count}")
       Spacer(modifier = Modifier.width(8.dp))
       Icon(
         imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_person_24),
         contentDescription = "followers icon",
-        modifier = Modifier.size(24.dp).padding(2.dp)
+        modifier = Modifier
+          .size(24.dp)
+          .padding(2.dp)
       )
       Text("${user.followers_count}")
     }
-    Text("${user.about}")
+    if (user.about != null) {
+      Text("${user.about}")
+    }
 
     // TODO: Gotta paginate!
     val api = LocalAstrobinApi.current
@@ -106,23 +115,41 @@ private fun UserScreenContent(user: AstroUser) {
         mapOf("user" to user.username)
       ).objects
     }.value
-    UserImages(userImages)
+    UserImages(userImages, nav)
   }
 }
 
 @Composable
-private fun UserImages(userImages: List<AstroImage>) {
+private fun UserImages(userImages: List<AstroImage>,   nav: NavController) {
   LazyColumn(
     modifier = Modifier.fillMaxSize(),
-    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
   ) {
     items(userImages) { image ->
-      Image(
-        // Bug here if I don't specify a size, I want fillWidth(). :(
-        modifier = Modifier.size(256.dp),
-        painter = rememberImagePainter(image.url_regular),
-        contentDescription = image.title,
-      )
+      Box {
+        Column(
+          Modifier.fillMaxWidth()
+        ) {
+          Image(
+            painter = rememberImagePainter(image.url_regular),
+            contentDescription = image.title,
+            contentScale = ContentScale.FillWidth,
+            // Bug here if I don't specify a size, I want fillWidth(). :(
+            modifier = Modifier
+              .size(width = 300.dp, height = 200.dp) // 3:2 ratio
+              .align(Alignment.CenterHorizontally)
+              .clickable {
+                nav.navigate("image/${image.hash}")
+              },
+          )
+        }
+        Text(
+          text = image.title,
+          color = Color.White,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          modifier = Modifier.align(Alignment.BottomCenter)
+        )
+      }
     }
   }
 }
@@ -148,5 +175,5 @@ fun UserScreenPreview() {
     avatar = null,
     resource_uri = "/api/v1/userprofile/12345/"
   )
-  UserScreenContent(data)
+  UserScreenContent(data, rememberNavController())
 }
