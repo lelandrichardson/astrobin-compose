@@ -10,6 +10,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PeopleAlt
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
@@ -86,7 +89,7 @@ private fun UserScreenContent(user: AstroUser, nav: NavController) {
       modifier = Modifier.align(Alignment.CenterHorizontally),
     ) {
       Icon(
-        imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_thumb_up_24),
+        imageVector = Icons.Filled.PeopleAlt,
         contentDescription = "like icon",
         modifier = Modifier
           .size(24.dp)
@@ -95,7 +98,7 @@ private fun UserScreenContent(user: AstroUser, nav: NavController) {
       Text("${user.received_likes_count}")
       Spacer(modifier = Modifier.width(8.dp))
       Icon(
-        imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_person_24),
+        imageVector = Icons.Filled.ThumbUp,
         contentDescription = "followers icon",
         modifier = Modifier
           .size(24.dp)
