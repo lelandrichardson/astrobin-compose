@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun TopScreen(
@@ -34,7 +35,11 @@ fun TopScreen(
   if (data == null) {
     Text(text = "Loading...")
   } else {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
+    LazyColumn(
+      modifier = Modifier.fillMaxSize(),
+      contentPadding = padding
+    ) {
+      item { Spacer(Modifier.statusBarsPadding()) }
       item { Text("Top Picks", style = MaterialTheme.typography.h1) }
       items(data.objects) {
         TopPickRow(it, nav)

@@ -39,6 +39,8 @@ import com.example.astrobin.ui.screens.UserScreen
 import com.example.astrobin.ui.theme.AstrobinTheme
 import com.example.astrobin.ui.theme.DarkBlue
 import com.example.astrobin.ui.theme.Yellow
+import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.navigationBarsPadding
 
 @Composable fun Astrobin(api: AstrobinApi, imageLoader: ImageLoader) {
   CompositionLocalProvider(
@@ -48,7 +50,7 @@ import com.example.astrobin.ui.theme.Yellow
     val nav = rememberNavController()
     AstrobinTheme {
       AstroAppWindow(
-        Modifier.fillMaxSize(),
+        Modifier.fillMaxSize().navigationBarsPadding(),
         top = {},
         bottom = {
           AstrobinBottomNav(nav)
@@ -151,46 +153,48 @@ private enum class AstroScaffoldLayoutContent { TopBar, MainContent, BottomBar }
   bottom: @Composable () -> Unit,
   content: @Composable (PaddingValues) -> Unit
 ) {
-  CompositionLocalProvider(
-    LocalContentColor provides Color.White,
-  ) {
-    SubcomposeLayout(
-      modifier.background(mainWindowGradient)
-    ) { constraints ->
-      val layoutWidth = constraints.maxWidth
-      val layoutHeight = constraints.maxHeight
+  ProvideWindowInsets {
+    CompositionLocalProvider(
+      LocalContentColor provides Color.White,
+    ) {
+      SubcomposeLayout(
+        modifier.background(mainWindowGradient)
+      ) { constraints ->
+        val layoutWidth = constraints.maxWidth
+        val layoutHeight = constraints.maxHeight
 
-      val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
-      layout(layoutWidth, layoutHeight) {
-        val topBarPlaceables = subcompose(AstroScaffoldLayoutContent.TopBar, top)
-          .map { it.measure(looseConstraints) }
+        layout(layoutWidth, layoutHeight) {
+          val topBarPlaceables = subcompose(AstroScaffoldLayoutContent.TopBar, top)
+            .map { it.measure(looseConstraints) }
 
-        val topBarHeight = topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
+          val topBarHeight = topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
 
-        val bottomBarPlaceables = subcompose(AstroScaffoldLayoutContent.BottomBar, bottom)
-          .map { it.measure(looseConstraints) }
+          val bottomBarPlaceables = subcompose(AstroScaffoldLayoutContent.BottomBar, bottom)
+            .map { it.measure(looseConstraints) }
 
-        val bottomBarHeight = bottomBarPlaceables.maxByOrNull { it.height }?.height ?: 0
+          val bottomBarHeight = bottomBarPlaceables.maxByOrNull { it.height }?.height ?: 0
 
-        val bodyContentHeight = layoutHeight - topBarHeight
+          val bodyContentHeight = layoutHeight - topBarHeight
 
-        val bodyContentPlaceables = subcompose(AstroScaffoldLayoutContent.MainContent) {
-          val innerPadding = PaddingValues(bottom = bottomBarHeight.toDp())
-          content(innerPadding)
-        }.map { it.measure(looseConstraints.copy(maxHeight = bodyContentHeight)) }
+          val bodyContentPlaceables = subcompose(AstroScaffoldLayoutContent.MainContent) {
+            val innerPadding = PaddingValues(bottom = bottomBarHeight.toDp())
+            content(innerPadding)
+          }.map { it.measure(looseConstraints.copy(maxHeight = bodyContentHeight)) }
 
-        // Placing to control drawing order to match default elevation of each placeable
+          // Placing to control drawing order to match default elevation of each placeable
 
-        bodyContentPlaceables.forEach {
-          it.place(0, topBarHeight)
-        }
-        topBarPlaceables.forEach {
-          it.place(0, 0)
-        }
-        // The bottom bar is always at the bottom of the layout
-        bottomBarPlaceables.forEach {
-          it.place(0, layoutHeight - bottomBarHeight)
+          bodyContentPlaceables.forEach {
+            it.place(0, topBarHeight)
+          }
+          topBarPlaceables.forEach {
+            it.place(0, 0)
+          }
+          // The bottom bar is always at the bottom of the layout
+          bottomBarPlaceables.forEach {
+            it.place(0, layoutHeight - bottomBarHeight)
+          }
         }
       }
     }

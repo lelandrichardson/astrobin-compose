@@ -70,6 +70,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:2.4.0-beta02"
     implementation "androidx.navigation:navigation-compose:2.4.0-beta02"
     implementation "com.google.accompanist:accompanist-flowlayout:0.20.2"
+    implementation "com.google.accompanist:accompanist-insets-ui:0.20.2"
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.moshi:moshi:1.11.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.11.0"

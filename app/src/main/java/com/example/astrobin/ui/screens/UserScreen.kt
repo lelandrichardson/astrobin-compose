@@ -31,6 +31,7 @@ import coil.compose.rememberImagePainter
 import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.AstroUser
 import com.example.astrobin.api.LocalAstrobinApi
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun UserScreen(
@@ -58,11 +59,12 @@ fun UserScreen(
         offset = 0,
         mapOf("user" to user.username)
       ).objects
-    }.value ?: emptyList()
+    }.value
     LazyColumn(
       modifier = Modifier.fillMaxSize(),
       contentPadding = padding,
     ) {
+      item { Spacer(Modifier.statusBarsPadding()) }
       item {
         UserHeaderContent(user, nav)
       }

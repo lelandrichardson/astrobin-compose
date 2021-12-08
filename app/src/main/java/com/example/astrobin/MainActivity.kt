@@ -7,6 +7,7 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
 import coil.ImageLoader
 import com.example.astrobin.api.AstrobinApi
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,21 +30,9 @@ class MainActivity : ComponentActivity() {
 }
 
 fun Window.makeTransparentStatusBar() {
-  markAttributes(
-    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-        or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-    true
-  )
-  decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-      or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-      or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-  markAttributes(
-    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-        or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-    false
-  )
+  WindowCompat.setDecorFitsSystemWindows(this, false)
   statusBarColor = Color.TRANSPARENT
-  navigationBarColor = Color.TRANSPARENT
+  navigationBarColor = Color.BLACK
 }
 
 fun Window.markAttributes(bits: Int, value: Boolean) {
