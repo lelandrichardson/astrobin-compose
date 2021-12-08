@@ -1,6 +1,8 @@
 package com.example.astrobin.api
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import com.squareup.moshi.Json
 import retrofit2.http.GET
 import retrofit2.http.Path

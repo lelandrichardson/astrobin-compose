@@ -5,24 +5,27 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.astrobin.api.AstroImage
-import com.example.astrobin.api.ListResponse
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.api.TopPick
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.statusBarsPadding
+import com.example.astrobin.api.*
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 
 @Composable
 fun TopScreen(
@@ -30,31 +33,52 @@ fun TopScreen(
   nav: NavController
 ) {
   val api = LocalAstrobinApi.current
-  val data = produceState<ListResponse<TopPick>?>(null) {
-    value = api.topPicks(10, 0)
-  }.value
-  if (data == null) {
-    Column(
-      modifier = Modifier.fillMaxWidth()
-    ) {
-      Spacer(Modifier.statusBarsPadding().height(16.dp))
-      CircularProgressIndicator(
-        color = Color.White,
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-      )
+  val pager = remember { Pager(PagingConfig(pageSize = 20)) { TopPickPagingSource(api) } }
+  val topPicks = pager.flow.collectAsLazyPagingItems()
+  val loadState = topPicks.loadState
+  LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
+    item { Spacer(Modifier.statusBarsPadding()) }
+    item { Text("Top Picks", style = MaterialTheme.typography.h1) }
+    items(topPicks) {
+      TopPickRow(it!!, nav)
+      Spacer(Modifier.height(8.dp))
     }
-  } else {
-    LazyColumn(
-      modifier = Modifier.fillMaxSize(),
-      contentPadding = padding
-    ) {
-      item { Spacer(Modifier.statusBarsPadding()) }
-      item { Text("Top Picks", style = MaterialTheme.typography.h1) }
-      items(data.objects) {
-        TopPickRow(it, nav)
-        Spacer(Modifier.height(8.dp))
+    when {
+      loadState.refresh is LoadState.Loading -> {
+        item { LoadingIndicator(Modifier.fillParentMaxSize()) }
+      }
+      loadState.append is LoadState.Loading -> {
+        item { LoadingIndicator(Modifier.fillMaxWidth()) }
+      }
+      loadState.refresh is LoadState.Error -> {
+        val e = loadState.refresh as LoadState.Error
+        item {
+          // TODO: retry?
+          Text(
+            text = e.error.localizedMessage!!,
+            modifier = Modifier.fillParentMaxSize(),
+          )
+        }
+      }
+      loadState.append is LoadState.Error -> {
+        val e = loadState.append as LoadState.Error
+        item {
+          // TODO: retry?
+          Text(e.error.localizedMessage!!)
+        }
       }
     }
+  }
+}
+
+@Composable fun LoadingIndicator(modifier: Modifier) {
+  Box(
+    modifier = modifier
+  ) {
+    CircularProgressIndicator(
+      color = Color.White,
+      modifier = Modifier.align(Alignment.Center)
+    )
   }
 }
 

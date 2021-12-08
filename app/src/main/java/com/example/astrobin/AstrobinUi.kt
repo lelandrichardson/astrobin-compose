@@ -73,10 +73,13 @@ import com.google.accompanist.insets.navigationBarsPadding
             ImageScreen(it.arguments!!.getString("hash")!!, nav)
           }
           composable(Routes.Search) {
-            SearchScreen(nav = nav, entry = it)
+            SearchScreen(nav = nav, entry = it, padding)
           }
           composable(Routes.Top) {
             TopScreen(padding, nav)
+          }
+          composable(Routes.Latest) {
+            SearchScreen(nav, entry = it, padding)
           }
         }
       }

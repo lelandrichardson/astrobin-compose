@@ -5,9 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -15,6 +13,7 @@ import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,11 +26,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.LoadState
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import coil.compose.rememberImagePainter
 import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.AstroUser
 import com.example.astrobin.api.LocalAstrobinApi
 import com.google.accompanist.insets.statusBarsPadding
+import com.example.astrobin.api.*
 
 @Composable
 fun UserScreen(
@@ -44,23 +49,15 @@ fun UserScreen(
     value = api.user(id)
   }.value
   if (user == null) {
-    Column(
-      modifier = Modifier.fillMaxWidth()
-    ) {
-      Spacer(Modifier.statusBarsPadding().height(16.dp))
-      CircularProgressIndicator(
-        color = Color.White,
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-      )
-    }
+    LoadingIndicator(Modifier.fillMaxWidth().statusBarsPadding())
   } else {
-    val userImages = produceState(emptyList<AstroImage>()) {
-      value = api.imageSearch(
-        limit = 0,
-        offset = 0,
-        mapOf("user" to user.username)
-      ).objects
-    }.value
+    val pager = remember(user.username) {
+      Pager(PagingConfig(pageSize = 20)) {
+        ImageSearchPagingSource(api, mapOf("user" to user.username))
+      }
+    }
+    val userImages = pager.flow.collectAsLazyPagingItems()
+    val loadState = userImages.loadState
     LazyColumn(
       modifier = Modifier.fillMaxSize(),
       contentPadding = padding,
@@ -69,22 +66,34 @@ fun UserScreen(
       item {
         UserHeaderContent(user, nav)
       }
-      if (userImages.isEmpty()) {
-        item {
-          Column(
-            modifier = Modifier.fillMaxWidth()
-          ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            CircularProgressIndicator(
-              color = Color.White,
-              modifier = Modifier.align(Alignment.CenterHorizontally)
+
+      items(userImages) {
+        UserImageRow(it!!, nav)
+        Spacer(modifier = Modifier.height(8.dp))
+      }
+      when {
+        loadState.refresh is LoadState.Loading -> {
+          item { LoadingIndicator(Modifier.fillParentMaxSize()) }
+        }
+        loadState.append is LoadState.Loading -> {
+          item { LoadingIndicator(Modifier.fillMaxWidth()) }
+        }
+        loadState.refresh is LoadState.Error -> {
+          val e = loadState.refresh as LoadState.Error
+          item {
+            // TODO: retry?
+            Text(
+              text = e.error.localizedMessage!!,
+              modifier = Modifier.fillParentMaxSize(),
             )
           }
         }
-      } else {
-        items(userImages) {
-          UserImageRow(it, nav)
-          Spacer(modifier = Modifier.height(8.dp))
+        loadState.append is LoadState.Error -> {
+          val e = loadState.append as LoadState.Error
+          item {
+            // TODO: retry?
+            Text(e.error.localizedMessage!!)
+          }
         }
       }
     }
