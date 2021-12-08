@@ -47,9 +47,10 @@ fun UserScreen(
     Column(
       modifier = Modifier.fillMaxWidth()
     ) {
+      Spacer(Modifier.statusBarsPadding().height(16.dp))
       CircularProgressIndicator(
-        Modifier
-          .align(Alignment.CenterHorizontally)
+        color = Color.White,
+        modifier = Modifier.align(Alignment.CenterHorizontally)
       )
     }
   } else {
@@ -68,9 +69,23 @@ fun UserScreen(
       item {
         UserHeaderContent(user, nav)
       }
-      items(userImages) {
-        UserImageRow(it, nav)
-        Spacer(modifier = Modifier.height(8.dp))
+      if (userImages.isEmpty()) {
+        item {
+          Column(
+            modifier = Modifier.fillMaxWidth()
+          ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            CircularProgressIndicator(
+              color = Color.White,
+              modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+          }
+        }
+      } else {
+        items(userImages) {
+          UserImageRow(it, nav)
+          Spacer(modifier = Modifier.height(8.dp))
+        }
       }
     }
   }

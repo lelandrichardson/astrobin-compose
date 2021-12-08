@@ -15,6 +15,7 @@ import com.example.astrobin.api.ListResponse
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.api.TopPick
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -33,7 +34,15 @@ fun TopScreen(
     value = api.topPicks(10, 0)
   }.value
   if (data == null) {
-    Text(text = "Loading...")
+    Column(
+      modifier = Modifier.fillMaxWidth()
+    ) {
+      Spacer(Modifier.statusBarsPadding().height(16.dp))
+      CircularProgressIndicator(
+        color = Color.White,
+        modifier = Modifier.align(Alignment.CenterHorizontally)
+      )
+    }
   } else {
     LazyColumn(
       modifier = Modifier.fillMaxSize(),

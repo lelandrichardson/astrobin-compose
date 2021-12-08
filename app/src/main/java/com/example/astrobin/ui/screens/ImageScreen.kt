@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.astrobin.api.*
 import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun ImageScreen(
@@ -45,10 +46,15 @@ fun ImageScreen(
       .verticalScroll(rememberScrollState())
   ) {
     if (data == null) {
-      CircularProgressIndicator(
-        Modifier
-          .align(Alignment.CenterHorizontally)
-      )
+      Column(
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        Spacer(Modifier.statusBarsPadding().height(16.dp))
+        CircularProgressIndicator(
+          color = Color.White,
+          modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+      }
     } else {
       Image(
         modifier = Modifier
