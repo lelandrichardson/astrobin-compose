@@ -6,10 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -35,15 +32,14 @@ import coil.compose.LocalImageLoader
 import com.example.astrobin.api.AstrobinApi
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.ui.Routes
-import com.example.astrobin.ui.screens.ImageScreen
-import com.example.astrobin.ui.screens.SearchScreen
-import com.example.astrobin.ui.screens.TopScreen
-import com.example.astrobin.ui.screens.UserScreen
+import com.example.astrobin.ui.screens.*
 import com.example.astrobin.ui.theme.AstrobinTheme
 import com.example.astrobin.ui.theme.DarkBlue
 import com.example.astrobin.ui.theme.Yellow
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.statusBarsHeight
+import com.google.accompanist.insets.statusBarsPadding
 
 @Composable fun Astrobin(api: AstrobinApi, imageLoader: ImageLoader) {
   CompositionLocalProvider(
@@ -51,14 +47,26 @@ import com.google.accompanist.insets.navigationBarsPadding
     LocalImageLoader provides imageLoader
   ) {
     val nav = rememberNavController()
+    val current by nav.currentBackStackEntryAsState()
     AstrobinTheme {
       AstroAppWindow(
         Modifier
           .fillMaxSize()
           .navigationBarsPadding(),
-        top = {},
+        top = {
+          if (current != null && nav.previousBackStackEntry != null) {
+            IconButton(
+              modifier = Modifier.statusBarsPadding().padding(8.dp),
+              onClick = { nav.popBackStack() }
+            ) {
+              Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+            }
+          }
+        },
         bottom = {
-          AstrobinBottomNav(nav)
+          if (current?.destination?.route?.startsWith("fullscreen") != true) {
+            AstrobinBottomNav(nav)
+          }
         },
       ) { padding ->
         NavHost(nav, startDestination = "top") {
@@ -89,6 +97,24 @@ import com.google.accompanist.insets.navigationBarsPadding
             listOf(navArgument("q") { type = NavType.StringType })
           ) {
             SearchScreen(nav = nav, entry = it, padding)
+          }
+          composable(
+            "fullscreen?hd={hd}&solution={solution}&w={w}&h={h}",
+            listOf(
+              navArgument("hd") { type = NavType.StringType },
+              navArgument("solution") { type = NavType.StringType; nullable = true },
+              navArgument("w") { type = NavType.IntType },
+              navArgument("h") { type = NavType.IntType },
+            )
+          ) {
+            FullScreen(
+              it.arguments!!.getString("hd")!!,
+              it.arguments?.getString("solution"),
+              it.arguments!!.getInt("w")!!,
+              it.arguments!!.getInt("h")!!,
+              padding,
+              nav
+            )
           }
           composable(Routes.Top) {
             TopScreen(padding, nav)
@@ -175,7 +201,8 @@ import com.google.accompanist.insets.navigationBarsPadding
         Icons.Filled.Search,
         contentDescription = null,
         tint = DarkBlue,
-        modifier = Modifier.padding(
+        modifier = Modifier
+          .padding(
             start = 20.dp,
             end = 20.dp,
             top = 16.dp,
@@ -219,7 +246,8 @@ private enum class AstroScaffoldLayoutContent { TopBar, MainContent, BottomBar }
           val topBarPlaceables = subcompose(AstroScaffoldLayoutContent.TopBar, top)
             .map { it.measure(looseConstraints) }
 
-          val topBarHeight = topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
+          // hard code to 0 as we want the top bar to "float" on top of things
+          val topBarHeight = 0 // topBarPlaceables.maxByOrNull { it.height }?.height ?: 0
 
           val bottomBarPlaceables = subcompose(AstroScaffoldLayoutContent.BottomBar, bottom)
             .map { it.measure(looseConstraints) }

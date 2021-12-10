@@ -49,7 +49,7 @@ fun AstroButton(
   selected: Boolean = false,
   modifier: Modifier = Modifier,
 ) {
-  val color = if (selected) Yellow else Color.Black
+  val color = if (selected) Yellow else Color.Transparent
   val contentColor = if (selected) DarkBlue else Color.White
   val borderColor = if (selected) Yellow else Color.White
   Surface(

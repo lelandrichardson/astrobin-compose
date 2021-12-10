@@ -92,7 +92,15 @@ fun ImageScreen(
         ) {
           AstroButton(
             icon = Icons.Filled.Fullscreen,
-            onClick = {},
+            onClick = {
+              val hd = data.url_hd.urlEncode()
+              val solution = data.url_solution?.urlEncode() ?: ""
+              val w = data.w.toString()
+              val h = data.h.toString()
+              nav.navigate(
+                "fullscreen?hd=$hd&solution=$solution&w=$w&h=$h"
+              )
+            },
             modifier = Modifier.padding(end = 8.dp),
           )
           AstroButton(
