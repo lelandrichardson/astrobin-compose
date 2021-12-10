@@ -2,7 +2,6 @@ package com.example.astrobin.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -18,9 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,11 +29,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.rememberImagePainter
-import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.AstroUser
+import com.example.astrobin.api.ImageSearchPagingSource
 import com.example.astrobin.api.LocalAstrobinApi
+import com.example.astrobin.ui.components.LoadingIndicator
+import com.example.astrobin.ui.components.UserImageRow
 import com.google.accompanist.insets.statusBarsPadding
-import com.example.astrobin.api.*
 
 @Composable
 fun UserScreen(
@@ -65,6 +63,7 @@ fun UserScreen(
       item { Spacer(Modifier.statusBarsPadding()) }
       item {
         UserHeaderContent(user, nav)
+        Spacer(modifier = Modifier.height(16.dp))
       }
 
       items(userImages) {
@@ -73,7 +72,7 @@ fun UserScreen(
       }
       when {
         loadState.refresh is LoadState.Loading -> {
-          item { LoadingIndicator(Modifier.fillParentMaxSize()) }
+          item { LoadingIndicator(Modifier.fillMaxWidth()) }
         }
         loadState.append is LoadState.Loading -> {
           item { LoadingIndicator(Modifier.fillMaxWidth()) }
@@ -106,10 +105,8 @@ private fun UserHeaderContent(user: AstroUser, nav: NavController) {
     modifier = Modifier.fillMaxWidth()
   ) {
     Spacer(modifier = Modifier.height(16.dp))
-    val avatarPainter =
-      user.avatar?.let { rememberImagePainter(it) } ?: ColorPainter(Color.LightGray)
     Image(
-      painter = avatarPainter,
+      painter = rememberImagePainter(user.url_avatar),
       contentDescription = "avatar",
       contentScale = ContentScale.Crop,
       modifier = Modifier
@@ -151,32 +148,6 @@ private fun UserHeaderContent(user: AstroUser, nav: NavController) {
     if (user.about != null) {
       Text("${user.about}")
     }
-  }
-}
-
-@Composable
-private fun UserImageRow(image: AstroImage, nav: NavController) {
-  Box {
-    Image(
-      painter = rememberImagePainter(image.url_regular),
-      contentDescription = image.title,
-      contentScale = ContentScale.FillWidth,
-      // Bug here if I don't specify a size, I want fillWidth(). :(
-      modifier = Modifier
-        .fillMaxWidth()
-        .aspectRatio(16f / 9f)
-        .border(2.dp, Color.DarkGray)
-        .clickable {
-          nav.navigate("image/${image.hash}")
-        },
-    )
-    Text(
-      text = image.title,
-      color = Color.White,
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-      modifier = Modifier.align(Alignment.BottomCenter),
-    )
   }
 }
 

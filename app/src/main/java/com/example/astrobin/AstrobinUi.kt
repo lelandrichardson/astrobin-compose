@@ -2,15 +2,18 @@ package com.example.astrobin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -50,14 +53,23 @@ import com.google.accompanist.insets.navigationBarsPadding
     val nav = rememberNavController()
     AstrobinTheme {
       AstroAppWindow(
-        Modifier.fillMaxSize().navigationBarsPadding(),
+        Modifier
+          .fillMaxSize()
+          .navigationBarsPadding(),
         top = {},
         bottom = {
           AstrobinBottomNav(nav)
         },
       ) { padding ->
-        NavHost(nav, startDestination = "home") {
+        NavHost(nav, startDestination = "top") {
           composable("home") {
+//            UserScreen(93620, padding, nav)
+            ImageScreen("v7v9fq", padding, nav)
+//            TopScreen(padding = padding, nav = nav)
+//            SearchScreen(nav = nav, entry = it, padding = padding)
+          }
+          composable("profile") {
+            // NOTE: hardcoded to leland's user id for demo purposes
             UserScreen(93620, padding, nav)
           }
           composable(
@@ -70,7 +82,7 @@ import com.google.accompanist.insets.navigationBarsPadding
             "image/{hash}",
             listOf(navArgument("hash") { type = NavType.StringType })
           ) {
-            ImageScreen(it.arguments!!.getString("hash")!!, nav)
+            ImageScreen(it.arguments!!.getString("hash")!!, padding, nav)
           }
           composable(Routes.Search) {
             SearchScreen(nav = nav, entry = it, padding)
@@ -112,44 +124,75 @@ import com.google.accompanist.insets.navigationBarsPadding
   )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable fun AstrobinBottomNav(nav: NavController) {
-  BottomNavigation(
-    Modifier.clip(RoundedCornerShape(topStart = 80.dp, topEnd = 80.dp)),
-    backgroundColor = Color.Black,
-  ) {
+  Box {
     val navBackStackEntry by nav.currentBackStackEntryAsState()
     val current = navBackStackEntry?.destination
-    AstrobinBottomNavigationItem(
-      route = Routes.Top,
-      name = "Top",
-      icon = Icons.Filled.Star,
-      nav = nav,
-      current = current
-    )
-    AstrobinBottomNavigationItem(
-      route = Routes.Latest,
-      name = "Latest",
-      icon = Icons.Filled.DateRange,
-      nav = nav,
-      current = current
-    )
-    AstrobinBottomNavigationItem(
-      route = Routes.Search,
-      name = "Search",
-      icon = Icons.Filled.Search,
-      nav = nav,
-      current = current
-    )
+    BottomNavigation(
+      Modifier
+        .clip(RoundedCornerShape(topStart = 50.dp, topEnd = 50.dp))
+        .align(Alignment.BottomCenter),
+      backgroundColor = Color.Black,
+    ) {
+      AstrobinBottomNavigationItem(
+        route = Routes.Top,
+        name = "TOP",
+        icon = Icons.Filled.Star,
+        nav = nav,
+        current = current
+      )
+      Spacer(Modifier.width(48.dp))
+      AstrobinBottomNavigationItem(
+        route = Routes.Profile,
+        name = "PROFILE",
+        icon = Icons.Filled.Person,
+        nav = nav,
+        current = current
+      )
+    }
+    Surface(
+      modifier = Modifier
+        .align(Alignment.BottomCenter),
+      shape = RoundedCornerShape(topStart = 50.dp, topEnd = 50.dp),
+      color = DarkBlue,
+      contentColor = Color.White,
+      onClick = {
+        nav.navigate(Routes.Search) {
+          popUpTo(nav.graph.findStartDestination().id) {
+            saveState = true
+          }
+          launchSingleTop = true
+          restoreState = true
+        }
+      }
+    ) {
+      Icon(
+        Icons.Filled.Search,
+        contentDescription = null,
+        tint = DarkBlue,
+        modifier = Modifier.padding(
+            start = 20.dp,
+            end = 20.dp,
+            top = 16.dp,
+            bottom = 20.dp
+          )
+          .background(Yellow, CircleShape)
+          .padding(8.dp)
+          .size(30.dp)
+      )
+    }
   }
 }
-
 
 private val mainWindowGradient = Brush.linearGradient(
   listOf(Color.Black, DarkBlue),
   start = Offset.Zero,
   end = Offset(0f, Float.POSITIVE_INFINITY)
 )
+
 private enum class AstroScaffoldLayoutContent { TopBar, MainContent, BottomBar }
+
 @Composable fun AstroAppWindow(
   modifier: Modifier = Modifier,
   top: @Composable () -> Unit,

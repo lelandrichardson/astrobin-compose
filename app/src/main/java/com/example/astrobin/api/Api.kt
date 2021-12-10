@@ -71,8 +71,8 @@ data class TopPick(
 
 data class AstroImage(
   @field:Json(name="id") val id: Int,
-  @field:Json(name="hash") val hash: String,
-  @field:Json(name="title") val title: String,
+  @field:Json(name="hash") val hash: String?,
+  @field:Json(name="title") val title: String?,
   @field:Json(name="user") val user: String, // username
 
   // dates
@@ -155,6 +155,15 @@ data class AstroUser(
   @field:Json(name="resource_uri") val resource_uri: String,
 ) {
   val display_name: String get() = real_name ?: "@$username"
+  val url_avatar: String get() {
+    // since we are faking some avatar data temporarily, i am special casing my avatar for demo purposes
+    if (id == 93620) return "https://cdn.astrobin.com/images/avatars/2/7/93669/resized/194/65616d9d63bbe81142157196d34396f4.png"
+    return avatar ?: avatarUrl(username)
+  }
+}
+
+fun avatarUrl(username: String): String {
+  return "https://i.pravatar.cc/300?u=$username"
 }
 
 data class AstroResultsMeta(

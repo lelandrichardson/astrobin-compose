@@ -26,6 +26,8 @@ import com.google.accompanist.insets.statusBarsPadding
 import com.example.astrobin.api.*
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import com.example.astrobin.ui.components.LoadingIndicator
+import com.example.astrobin.ui.components.TopPickRow
 
 @Composable
 fun TopScreen(
@@ -38,7 +40,13 @@ fun TopScreen(
   val loadState = topPicks.loadState
   LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
     item { Spacer(Modifier.statusBarsPadding()) }
-    item { Text("Top Picks", style = MaterialTheme.typography.h1) }
+    item {
+      Text(
+        "Top Picks",
+        style = MaterialTheme.typography.h1,
+        modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
+      )
+    }
     items(topPicks) {
       TopPickRow(it!!, nav)
       Spacer(Modifier.height(8.dp))
@@ -71,33 +79,6 @@ fun TopScreen(
   }
 }
 
-@Composable fun LoadingIndicator(modifier: Modifier) {
-  Box(
-    modifier = modifier
-  ) {
-    CircularProgressIndicator(
-      color = Color.White,
-      modifier = Modifier.align(Alignment.Center)
-    )
-  }
-}
 
 
-@Composable fun TopPickRow(image: TopPick, nav: NavController) {
-  Column(Modifier.fillMaxWidth()) {
-    Image(
-      painter = rememberImagePainter(image.url_regular),
-      contentDescription = "",
-      contentScale = ContentScale.FillWidth,
-      // Bug here if I don't specify a size, I want fillWidth(). :(
-      modifier = Modifier
-        .fillMaxWidth()
-        .aspectRatio(16f / 9f)
-        .align(Alignment.CenterHorizontally)
-        .border(2.dp, Color.DarkGray)
-        .clickable {
-          nav.navigate("image/${image.hash}")
-        },
-    )
-  }
-}
+
