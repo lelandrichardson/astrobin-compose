@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.PeopleAlt
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -30,7 +31,8 @@ fun UserRow(user: AstroUser, nav: NavController) {
     modifier = Modifier
       .clickable {
         nav.navigate("user/${user.id}")
-      }
+      },
+    verticalAlignment = Alignment.CenterVertically
   ) {
     AstroAvatar(user.url_avatar)
     Column(Modifier.padding(start=10.dp)) {
@@ -56,7 +58,7 @@ fun SmallUserRow(
   views: Int,
   modifier: Modifier = Modifier,
 ) {
-  Row(modifier) {
+  Row(modifier, verticalAlignment = Alignment.CenterVertically) {
     AstroAvatar(avatarUrl(user))
     Column(Modifier.padding(start=10.dp)) {
       Text("@$user", style= MaterialTheme.typography.subtitle1)
@@ -85,7 +87,7 @@ fun SmallUserRow(
       .padding(2.dp)
       .clip(CircleShape)
       .background(Color.Black)
-      .size(38.dp)
+      .size(34.dp)
   )
 }
 

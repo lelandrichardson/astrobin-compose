@@ -209,10 +209,10 @@ fun ImageScreen(
       icon,
       contentDescription = contentDescription,
       modifier = Modifier
-        .padding(top = 4.dp, end = 4.dp)
-        .size(16.dp)
+        .padding(top = 0.dp, end = 4.dp)
+        .size(14.dp)
     )
-    Text("$count", fontSize = 16.sp)
+    Text("$count", style = MaterialTheme.typography.subtitle2)
   }
 }
 
@@ -226,7 +226,7 @@ fun ImageScreen(
       .padding(horizontal = if (fullWidth) 0.dp else 16.dp)
       .padding(bottom = 16.dp)
   ) {
-    Text(title, style = MaterialTheme.typography.h3, modifier = Modifier.padding(bottom = 8.dp))
+    Text(title, style = MaterialTheme.typography.h1, modifier = Modifier.padding(bottom = 8.dp))
     content()
   }
 }

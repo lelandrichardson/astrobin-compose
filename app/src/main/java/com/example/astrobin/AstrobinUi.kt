@@ -61,7 +61,7 @@ import com.google.accompanist.insets.navigationBarsPadding
           AstrobinBottomNav(nav)
         },
       ) { padding ->
-        NavHost(nav, startDestination = "home") {
+        NavHost(nav, startDestination = "top") {
           composable("home") {
 //            UserScreen(93620, padding, nav)
             ImageScreen("v7v9fq", padding, nav)
@@ -93,7 +93,7 @@ import com.google.accompanist.insets.navigationBarsPadding
           composable(Routes.Top) {
             TopScreen(padding, nav)
           }
-          composable(Routes.Latest) {
+          composable(Routes.Search) {
             SearchScreen(nav, entry = it, padding)
           }
         }

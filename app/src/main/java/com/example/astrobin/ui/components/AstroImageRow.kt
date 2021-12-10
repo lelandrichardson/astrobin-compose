@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
@@ -97,6 +98,7 @@ fun TopPickRow(image: TopPick, nav: NavController) {
     if (fullImage != null) {
       Text(
         fullImage.title ?: "",
+        style = MaterialTheme.typography.h1,
         maxLines = 1,
         fontSize = 18.sp,
         modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
@@ -124,6 +126,7 @@ fun ImageRow(image: AstroImage, nav: NavController) {
   ) {
     Text(
       text = image.title ?: "",
+      style = MaterialTheme.typography.h1,
       color = Color.White,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
@@ -151,6 +154,7 @@ fun UserImageRow(image: AstroImage, nav: NavController) {
   ) {
     Text(
       text = image.title ?: "",
+      style = MaterialTheme.typography.h1,
       color = Color.White,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
