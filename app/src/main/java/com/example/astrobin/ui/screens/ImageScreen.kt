@@ -1,12 +1,23 @@
 package com.example.astrobin.ui.screens
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,11 +28,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.astrobin.api.*
-import com.example.astrobin.ui.components.LoadingIndicator
-import com.example.astrobin.ui.components.UserRow
+import com.example.astrobin.api.AstroImage
+import com.example.astrobin.api.AstroUser
+import com.example.astrobin.api.LocalAstrobinApi
+import com.example.astrobin.ui.components.*
 import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.insets.statusBarsPadding
+import java.net.URLEncoder
 
 @Composable
 fun ImageScreen(
@@ -40,6 +52,8 @@ fun ImageScreen(
     }
   }.value
 
+  var annotations by remember { mutableStateOf(false) }
+
   LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
     if (data == null) {
       item {
@@ -47,20 +61,83 @@ fun ImageScreen(
       }
     } else {
       item {
-        Image(
-          modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(data.aspectRatio),
-          painter = rememberImagePainter(data.url_regular),
-          contentDescription = "Full Image",
-        )
+        val regularPainter = rememberImagePainter(data.url_regular)
+        val annotatedPainter = rememberImagePainter(data.url_solution)
+        Box {
+          Image(
+            modifier = Modifier
+              .fillMaxWidth()
+              .aspectRatio(data.aspectRatio),
+            painter = regularPainter,
+            contentDescription = "Full Image",
+          )
+          if (annotations) {
+            Image(
+              modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(data.aspectRatio),
+              painter = annotatedPainter,
+              contentDescription = "Full Image",
+            )
+          }
+        }
+      }
+
+      item {
+        Row(Modifier
+          .background(Color.Black)
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp, vertical = 8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          AstroButton(
+            icon = Icons.Filled.Fullscreen,
+            onClick = {},
+            modifier = Modifier.padding(end = 8.dp),
+          )
+          AstroButton(
+            icon = Icons.Outlined.Layers,
+            selected = annotations,
+            onClick = { annotations = !annotations },
+            modifier = Modifier.padding(end = 8.dp),
+          )
+
+          Spacer(Modifier.weight(1f))
+
+          CountButton(
+            icon = Icons.Outlined.BookmarkBorder,
+            label = data.bookmarks.toString(),
+            selected = false,
+            onClick = {},
+          )
+
+          CountButton(
+            icon = Icons.Outlined.ThumbUp,
+            label = data.likes.toString(),
+            selected = false,
+            onClick = {},
+          )
+        }
       }
 
       item {
         Column(Modifier.padding(horizontal = 10.dp)) {
           Text(data.title ?: "", style = MaterialTheme.typography.h1)
           if (user != null) {
-            UserRow(user, nav)
+            Row(
+              Modifier.fillMaxWidth(),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+              UserRow(user, nav)
+              AstroButton2(
+                icon = Icons.Outlined.PersonAdd,
+                label = "Follow",
+                selected = false,
+                onClick = {},
+                modifier = Modifier
+              )
+            }
           } else {
             CircularProgressIndicator(
               Modifier
@@ -73,7 +150,8 @@ fun ImageScreen(
       item {
         Section("Subjects") {
           FlowRow(mainAxisSpacing = 10.dp, crossAxisSpacing = 4.dp) {
-            for (subject in data.subjects) Chip(subject)
+            for (subject in data.subjects)
+              Chip(subject, onClick = { nav.navigate("search?q=${subject.urlEncode()}")})
           }
         }
       }
@@ -145,10 +223,10 @@ fun ImageScreen(
 ) {
   Column(
     Modifier
-      .padding(horizontal = if (fullWidth) 0.dp else 10.dp)
-      .padding(bottom = 10.dp)
+      .padding(horizontal = if (fullWidth) 0.dp else 16.dp)
+      .padding(bottom = 16.dp)
   ) {
-    Text(title, style = MaterialTheme.typography.h3)
+    Text(title, style = MaterialTheme.typography.h3, modifier = Modifier.padding(bottom = 8.dp))
     content()
   }
 }
@@ -156,10 +234,12 @@ fun ImageScreen(
 @Composable fun Chip(
   value: String,
   color: Color = Color.White,
+  onClick: () -> Unit,
 ) {
   Text(
     value,
     modifier = Modifier
+      .clickable(onClick = onClick)
       .border(1.dp, color, RoundedCornerShape(6.dp))
       .padding(4.dp, 4.dp),
     style = MaterialTheme.typography.caption,
@@ -180,3 +260,5 @@ fun ImageScreen(
     }
   }
 }
+
+fun String.urlEncode(): String = URLEncoder.encode(this, "utf-8")

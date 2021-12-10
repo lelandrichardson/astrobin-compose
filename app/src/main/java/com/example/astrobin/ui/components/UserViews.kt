@@ -28,7 +28,6 @@ import com.example.astrobin.ui.theme.Yellow
 fun UserRow(user: AstroUser, nav: NavController) {
   Row(
     modifier = Modifier
-      .fillMaxWidth()
       .clickable {
         nav.navigate("user/${user.id}")
       }

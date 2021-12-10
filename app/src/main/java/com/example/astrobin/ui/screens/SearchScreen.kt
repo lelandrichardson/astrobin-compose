@@ -43,7 +43,7 @@ fun SearchScreen(
   entry: NavBackStackEntry,
   padding: PaddingValues,
 ) {
-  var searchQueryText by remember { mutableStateOf("") }
+  var searchQueryText by remember { mutableStateOf(entry.arguments?.getString("q") ?: "") }
   val api = LocalAstrobinApi.current
   var pagingSource by remember { mutableStateOf<ImageSearchPagingSource?>(null) }
   val pager = remember {

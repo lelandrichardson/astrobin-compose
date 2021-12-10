@@ -61,7 +61,7 @@ import com.google.accompanist.insets.navigationBarsPadding
           AstrobinBottomNav(nav)
         },
       ) { padding ->
-        NavHost(nav, startDestination = "top") {
+        NavHost(nav, startDestination = "home") {
           composable("home") {
 //            UserScreen(93620, padding, nav)
             ImageScreen("v7v9fq", padding, nav)
@@ -84,7 +84,10 @@ import com.google.accompanist.insets.navigationBarsPadding
           ) {
             ImageScreen(it.arguments!!.getString("hash")!!, padding, nav)
           }
-          composable(Routes.Search) {
+          composable(
+            "search?q={q}",
+            listOf(navArgument("q") { type = NavType.StringType })
+          ) {
             SearchScreen(nav = nav, entry = it, padding)
           }
           composable(Routes.Top) {
@@ -154,6 +157,7 @@ import com.google.accompanist.insets.navigationBarsPadding
     Surface(
       modifier = Modifier
         .align(Alignment.BottomCenter),
+      elevation = 40.dp,
       shape = RoundedCornerShape(topStart = 50.dp, topEnd = 50.dp),
       color = DarkBlue,
       contentColor = Color.White,
