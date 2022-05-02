@@ -19,15 +19,21 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        // Support both local.properties or ~/.gradle/gradle.properties
+        def properties = new Properties()
+        if (rootProject.file("local.properties").exists()) {
+            properties.load(rootProject.file("local.properties").newDataInputStream())
+        }
         buildConfigField(
                 "String",
                 "ASTROBIN_API_KEY",
-                "\"" + property("ASTROBIN_API_KEY") + "\""
+                "\"${properties["ASTROBIN_API_KEY"] ?: property("ASTROBIN_API_KEY")}\""
         )
         buildConfigField(
                 "String",
                 "ASTROBIN_API_SECRET",
-                "\"" + property("ASTROBIN_API_SECRET") + "\""
+                "\"${properties["ASTROBIN_API_SECRET"] ?: property("ASTROBIN_API_SECRET")}\""
         )
     }
 
