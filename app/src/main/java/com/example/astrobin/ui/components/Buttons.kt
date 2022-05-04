@@ -19,28 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.example.astrobin.ui.theme.DarkBlue
 import com.example.astrobin.ui.theme.Yellow
 
-private fun <T: Any?> T.asState(): State<T> = object : State<T> {
-  override val value: T = this@asState
-  override fun hashCode(): Int = this@asState.hashCode()
-  override fun equals(other: Any?): Boolean {
-    return this@asState?.equals(other) ?: (other == null)
-  }
-}
-
-private val buttonColors = object : ButtonColors {
-  val background = Color.Black.asState()
-  val foreground = Color.White.asState()
-  @Composable override fun backgroundColor(enabled: Boolean): State<Color> = background
-  @Composable override fun contentColor(enabled: Boolean): State<Color> = foreground
-}
-
-private val selectedColors = object : ButtonColors {
-  val background = Yellow.asState()
-  val foreground = DarkBlue.asState()
-  @Composable override fun backgroundColor(enabled: Boolean): State<Color> = background
-  @Composable override fun contentColor(enabled: Boolean): State<Color> = foreground
-}
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AstroButton(

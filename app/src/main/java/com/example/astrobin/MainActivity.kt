@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import coil.ImageLoader
+import com.example.astrobin.api.Astrobin
 import com.example.astrobin.api.AstrobinApi
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -17,7 +18,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
   @Inject
-  lateinit var api: AstrobinApi
+  lateinit var api: Astrobin
 
   @Inject
   lateinit var imageLoader: ImageLoader
@@ -27,20 +28,4 @@ class MainActivity : ComponentActivity() {
     window.makeTransparentStatusBar()
     setContent { Astrobin(api, imageLoader) }
   }
-}
-
-fun Window.makeTransparentStatusBar() {
-  WindowCompat.setDecorFitsSystemWindows(this, false)
-  statusBarColor = Color.TRANSPARENT
-  navigationBarColor = Color.BLACK
-}
-
-fun Window.markAttributes(bits: Int, value: Boolean) {
-  val params = attributes
-  if (value) {
-    params.flags = params.flags or bits
-  } else {
-    params.flags = params.flags and bits.inv()
-  }
-  attributes = params
 }

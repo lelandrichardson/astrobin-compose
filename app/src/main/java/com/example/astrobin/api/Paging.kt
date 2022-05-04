@@ -29,7 +29,7 @@ abstract class AstroPagingSource<T : Any> : PagingSource<Int, T>() {
 }
 
 class TopPickPagingSource(
-  private val api: AstrobinApi
+  private val api: Astrobin
 ) : AstroPagingSource<TopPick>() {
   override suspend fun load(limit: Int, offset: Int): ListResponse<TopPick> {
     return api.topPicks(limit, offset)
@@ -37,7 +37,7 @@ class TopPickPagingSource(
 }
 
 class ImageOfTheDayPagingSource(
-  private val api: AstrobinApi
+  private val api: Astrobin
 ) : AstroPagingSource<TopPick>() {
   override suspend fun load(limit: Int, offset: Int): ListResponse<TopPick> {
     return api.imageOfTheDay(limit, offset)
@@ -45,7 +45,7 @@ class ImageOfTheDayPagingSource(
 }
 
 class ImageSearchPagingSource(
-  private val api: AstrobinApi,
+  private val api: Astrobin,
   val params: Map<String, String>
 ) : AstroPagingSource<AstroImage>() {
   override suspend fun load(limit: Int, offset: Int): ListResponse<AstroImage> {

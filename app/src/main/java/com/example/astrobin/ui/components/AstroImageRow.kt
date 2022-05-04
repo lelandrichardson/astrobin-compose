@@ -2,7 +2,6 @@ package com.example.astrobin.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,23 +16,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.astrobin.api.AstroImage
-import com.example.astrobin.api.AstroUser
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.api.TopPick
 
-@Preview
-@Composable fun ImagePreview() {
-  AstroImage(
-    imageUrl = "https://www.astrobin.com/nlw5b0/0/rawthumb/real/",
-    onClick = {},
-  )
-}
 
 private val imageForegroundGradient = Brush.linearGradient(
   0.5f to Color.Transparent,
@@ -88,7 +78,7 @@ fun AstroImageWithContent(
 fun TopPickRow(image: TopPick, nav: NavController) {
   val api = LocalAstrobinApi.current
   val fullImage = produceState<AstroImage?>(null) {
-    value = api.image(image.hash)
+    value = api.imageOld(image.hash)
   }.value
   AstroImageWithContent(
     modifier = Modifier.padding(horizontal = 16.dp),

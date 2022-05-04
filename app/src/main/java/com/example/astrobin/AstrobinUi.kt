@@ -31,6 +31,8 @@ import coil.ImageLoader
 import coil.compose.LocalImageLoader
 import com.example.astrobin.api.AstrobinApi
 import com.example.astrobin.api.LocalAstrobinApi
+import com.example.astrobin.api.ApiTest
+import com.example.astrobin.api.Astrobin
 import com.example.astrobin.ui.Routes
 import com.example.astrobin.ui.screens.*
 import com.example.astrobin.ui.theme.AstrobinTheme
@@ -41,7 +43,7 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
 
-@Composable fun Astrobin(api: AstrobinApi, imageLoader: ImageLoader) {
+@Composable fun Astrobin(api: Astrobin, imageLoader: ImageLoader) {
   CompositionLocalProvider(
     LocalAstrobinApi provides api,
     LocalImageLoader provides imageLoader
@@ -69,10 +71,11 @@ import com.google.accompanist.insets.statusBarsPadding
           }
         },
       ) { padding ->
-        NavHost(nav, startDestination = "top") {
+        NavHost(nav, startDestination = "home") {
           composable("home") {
 //            UserScreen(93620, padding, nav)
-            ImageScreen("v7v9fq", padding, nav)
+//            ImageScreen("v7v9fq", padding, nav)
+            ApiTest()
 //            TopScreen(padding = padding, nav = nav)
 //            SearchScreen(nav = nav, entry = it, padding = padding)
           }
@@ -110,8 +113,8 @@ import com.google.accompanist.insets.statusBarsPadding
             FullScreen(
               it.arguments!!.getString("hd")!!,
               it.arguments?.getString("solution"),
-              it.arguments!!.getInt("w")!!,
-              it.arguments!!.getInt("h")!!,
+              it.arguments!!.getInt("w"),
+              it.arguments!!.getInt("h"),
               padding,
               nav
             )

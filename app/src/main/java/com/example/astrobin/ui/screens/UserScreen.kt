@@ -18,18 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.rememberImagePainter
-import com.example.astrobin.api.AstroUser
+import com.example.astrobin.api.AstroUserProfile
 import com.example.astrobin.api.ImageSearchPagingSource
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.ui.components.LoadingIndicator
@@ -43,8 +41,8 @@ fun UserScreen(
   nav: NavController
 ) {
   val api = LocalAstrobinApi.current
-  val user = produceState<AstroUser?>(null) {
-    value = api.user(id)
+  val user = produceState<AstroUserProfile?>(null) {
+    value = api.userProfile(id)
   }.value
   if (user == null) {
     LoadingIndicator(Modifier.fillMaxWidth().statusBarsPadding())
@@ -100,7 +98,7 @@ fun UserScreen(
 }
 
 @Composable
-private fun UserHeaderContent(user: AstroUser, nav: NavController) {
+private fun UserHeaderContent(user: AstroUserProfile, nav: NavController) {
   Column(
     modifier = Modifier.fillMaxWidth()
   ) {
@@ -149,28 +147,4 @@ private fun UserHeaderContent(user: AstroUser, nav: NavController) {
       Text("${user.about}")
     }
   }
-}
-
-@Preview
-@Composable
-fun UserScreenPreview() {
-  val data = AstroUser(
-    id = 12345,
-    username = "DanyBoricua",
-    real_name = "Daniel Santiago",
-    followers_count = 100,
-    following_count = 10,
-    post_count = 5,
-    received_likes_count = 1000000,
-    image_count = 3,
-    about = "Cool Astro Dude",
-    hobbies = "Astro Gaming",
-    website = null,
-    job = "Sanitation Engineer",
-    date_joined = "2020-12-27T05:07:46.108323",
-    language = "es",
-    avatar = null,
-    resource_uri = "/api/v1/userprofile/12345/"
-  )
-  UserHeaderContent(data, rememberNavController())
 }

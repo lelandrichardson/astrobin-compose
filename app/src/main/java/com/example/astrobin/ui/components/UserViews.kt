@@ -20,13 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.astrobin.api.AstroUser
+import com.example.astrobin.api.AstroUserProfile
 import com.example.astrobin.api.avatarUrl
 import com.example.astrobin.ui.screens.IconCount
 import com.example.astrobin.ui.theme.Yellow
 
 @Composable
-fun UserRow(user: AstroUser, nav: NavController) {
+fun UserRow(user: AstroUserProfile, nav: NavController) {
   Row(
     modifier = Modifier
       .clickable {
@@ -92,7 +92,7 @@ fun SmallUserRow(
 }
 
 @Composable fun AstroAvatar(
-  user: AstroUser
+  user: AstroUserProfile
 ) {
   AstroAvatar(imageUrl = user.url_avatar)
 }

@@ -1,175 +1,172 @@
 package com.example.astrobin.api
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
-import com.squareup.moshi.Json
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
-import retrofit2.http.QueryMap
+import retrofit2.http.*
 
-val LocalAstrobinApi = staticCompositionLocalOf<AstrobinApi> {
+val LocalAstrobinApi = staticCompositionLocalOf<Astrobin> {
   error("No Astrobin API was provided, but it should have been")
 }
 
+class Astrobin(
+  private val auth: AuthenticationInterceptor,
+  private val api: AstrobinApi,
+) {
+  fun isLoggedIn(): Boolean = auth.isLoggedIn()
+
+  fun logout(): Unit = auth.clear()
+
+  suspend fun login(username: String, password: String) = auth.setCredentials(username, password)
+
+  suspend fun register(
+    username: String,
+    email: String,
+    password: String
+  ): Boolean {
+    // TODO: an api doesn't exist for this yet
+    return false
+  }
+
+  suspend fun currentUser(): AstroUserProfile? = if (isLoggedIn()) api.currentUser().singleOrNull() else null
+
+  suspend fun image(hash: String): Paginated<AstroImageV2> = api.image(hash)
+
+  suspend fun image(id: Int): AstroImageV2 = api.image(id)
+
+  suspend fun imageRevision(image: Int): Paginated<AstroImageRevision> = api.imageRevision(image)
+
+  suspend fun thumbnailGroup(imageId: Int): ThumbnailGroup = api.thumbnailGroup(imageId)
+
+  suspend fun comments(
+    contentType: Int,
+    objectId: Int,
+  ): List<AstroComment> = api.comments(contentType, objectId)
+
+  suspend fun createComment(
+    comment: AstroComment,
+  ): AstroComment = api.createComment(comment)
+
+  suspend fun plateSolve(
+    contentType: Int,
+    objectId: Int
+  ): List<PlateSolve> = api.plateSolve(contentType, objectId)
+
+  suspend fun plateSolves(
+    contentType: Int,
+    objectIds: List<Int>,
+  ): List<PlateSolve> = api.plateSolves(contentType, objectIds.joinToString(","))
+
+  suspend fun user(
+    id: Int
+  ): AstroUser = api.user(id)
+
+  suspend fun userProfile(id: Int): AstroUserProfile = api.userProfile(id)
+
+  suspend fun userProfile(username: String): ListResponse<AstroUserProfile> = api.userProfile(username)
+
+  suspend fun imageOld(hash: String): AstroImage = api.imageOld(hash)
+
+  suspend fun imageSearch(
+    limit: Int,
+    offset: Int,
+    params: Map<String, String>
+  ): ListResponse<AstroImage> = api.imageSearch(limit, offset, params)
+
+  suspend fun topPicks(
+    limit: Int,
+    offset: Int,
+  ): ListResponse<TopPick> = api.topPicks(limit, offset)
+
+  suspend fun topPickNominations(
+    limit: Int,
+    offset: Int,
+  ): ListResponse<TopPick> = api.topPickNominations(limit, offset)
+
+  suspend fun imageOfTheDay(
+    limit: Int,
+    offset: Int,
+  ): ListResponse<TopPick> = api.imageOfTheDay(limit, offset)
+}
+
 interface AstrobinApi {
-  @GET("userprofile/{id}/")
-  suspend fun user(@Path("id") id: Int): AstroUser
 
-  @GET("userprofile/")
-  suspend fun user(@Query("username") username: String): ListResponse<AstroUser>
+  @GET("api/v2/common/userprofiles/current/")
+  suspend fun currentUser(): List<AstroUserProfile>
 
-  @GET("image/{hash}/")
-  suspend fun image(@Path("hash") hash: String): AstroImage
+  @GET("api/v2/images/image/")
+  suspend fun image(@Query("hash") hash: String): Paginated<AstroImageV2>
 
-  @GET("image/")
+  @GET("api/v2/images/image/{id}/")
+  suspend fun image(@Path("id") id: Int): AstroImageV2
+
+  @GET("api/v2/images/image-revision/")
+  suspend fun imageRevision(@Query("image") image: Int): Paginated<AstroImageRevision>
+
+  @GET("api/v2/images/thumbnail-group/")
+  suspend fun thumbnailGroup(@Query("image") imageId: Int): ThumbnailGroup
+
+  @GET("api/v2/nestedcomments/nestedcomments/")
+  suspend fun comments(
+    @Query("content_type") contentType: Int,
+    @Query("object_id") objectId: Int,
+  ): List<AstroComment>
+
+  @POST("api/v2/nestedcomments/")
+  suspend fun createComment(
+    @Body comment: AstroComment,
+  ): AstroComment
+
+
+
+
+  @GET("api/v2/platesolving/solutions/")
+  suspend fun plateSolve(
+    @Query("content_type") contentType: Int,
+    @Query("object_id") objectId: Int
+  ): List<PlateSolve>
+
+  @GET("api/v2/platesolving/solutions/")
+  suspend fun plateSolves(
+    @Query("content_type") contentType: Int,
+    @Query("object_ids") objectIds: String
+  ): List<PlateSolve>
+
+  @GET("api/v2/common/users/{id}/")
+  suspend fun user(
+    @Path("id") id: Int
+  ): AstroUser
+
+  @GET("api/v1/userprofile/{id}/")
+  suspend fun userProfile(@Path("id") id: Int): AstroUserProfile
+
+  @GET("api/v1/userprofile/")
+  suspend fun userProfile(@Query("username") username: String): ListResponse<AstroUserProfile>
+
+  @GET("api/v1/image/{hash}/")
+  suspend fun imageOld(@Path("hash") hash: String): AstroImage
+
+  @GET("api/v1/image/")
   suspend fun imageSearch(
     @Query("limit") limit: Int,
     @Query("offset") offset: Int,
     @QueryMap params: Map<String, String>
   ): ListResponse<AstroImage>
 
-  @GET("toppick/")
+  @GET("api/v1/toppick/")
   suspend fun topPicks(
     @Query("limit") limit: Int,
     @Query("offset") offset: Int,
   ): ListResponse<TopPick>
 
-  @GET("toppicknominations/")
+  @GET("api/v1/toppicknominations/")
   suspend fun topPickNominations(
     @Query("limit") limit: Int,
     @Query("offset") offset: Int,
   ): ListResponse<TopPick>
 
-  @GET("imageoftheday/")
+  @GET("api/v1/imageoftheday/")
   suspend fun imageOfTheDay(
     @Query("limit") limit: Int,
     @Query("offset") offset: Int,
   ): ListResponse<TopPick>
 }
 
-data class ListResponse<T>(
-  @field:Json(name="meta") val meta: AstroResultsMeta,
-  @field:Json(name="objects") val objects: List<T>,
-)
-
-private fun imageUrl(hash: String, type: String) = "https://www.astrobin.com/$hash/0/rawthumb/$type/"
-
-data class TopPick(
-  @field:Json(name="date") val date: String,
-  @field:Json(name="image") val image: String,
-  @field:Json(name="resource_uri") val resource_uri: String
-) {
-  val hash: String get() = image.substringAfterLast('/')
-  val url_regular: String get() = imageUrl(hash, "regular")
-  val url_thumb: String get() = imageUrl(hash, "thumb")
-  val url_real: String get() = imageUrl(hash, "real")
-  val url_gallery: String get() = imageUrl(hash, "gallery")
-  val url_hd: String get() = imageUrl(hash, "hd")
-}
-
-data class AstroImage(
-  @field:Json(name="id") val id: Int,
-  @field:Json(name="hash") val hash: String?,
-  @field:Json(name="title") val title: String?,
-  @field:Json(name="user") val user: String, // username
-
-  // dates
-  @field:Json(name="published") val published: String,
-  @field:Json(name="updated") val updated: String,
-  @field:Json(name="uploaded") val uploaded: String,
-
-  // astrometry
-  @field:Json(name="is_solved") val is_solved: Boolean,
-  @field:Json(name="solution_status") val solution_status: String,
-  @field:Json(name="ra") val ra: String?, // float
-  @field:Json(name="dec") val dec: String?, // Float
-  @field:Json(name="pixscale") val pixscale: String?, // Float
-  @field:Json(name="radius") val radius: String?, // float
-  @field:Json(name="orientation") val orientation: String?, // Float
-  @field:Json(name="w") val w: Int,
-  @field:Json(name="h") val h: Int,
-
-  // images
-  @field:Json(name="url_advanced_solution") val url_advanced_solution: String?,
-  @field:Json(name="url_duckduckgo") val url_duckduckgo: String,
-  @field:Json(name="url_duckduckgo_small") val url_duckduckgo_small: String,
-  @field:Json(name="url_gallery") val url_gallery: String,
-  @field:Json(name="url_hd") val url_hd: String,
-  @field:Json(name="url_histogram") val url_histogram: String,
-  @field:Json(name="url_real") val url_real: String,
-  @field:Json(name="url_regular") val url_regular: String,
-  @field:Json(name="url_skyplot") val url_skyplot: String?,
-  @field:Json(name="url_solution") val url_solution: String?,
-  @field:Json(name="url_thumb") val url_thumb: String,
-
-  // statistics
-  @field:Json(name="comments") val comments: Int,
-  @field:Json(name="likes") val likes: Int,
-  @field:Json(name="views") val views: Int,
-
-  // technical card
-  @field:Json(name="imaging_cameras") val imaging_cameras: List<String>,
-  @field:Json(name="imaging_telescopes") val imaging_telescopes: List<String>,
-  @field:Json(name="data_source") val data_source: String,
-  @field:Json(name="locations") val locations: List<String>,
-  @field:Json(name="remote_source") val remote_source: String?,
-  @field:Json(name="subjects") val subjects: List<String>,
-
-  // other
-  @field:Json(name="animated") val animated: Boolean,
-  @field:Json(name="bookmarks") val bookmarks: Int,
-  @field:Json(name="is_final") val is_final: Boolean,
-  @field:Json(name="license") val license: Int,
-  @field:Json(name="license_name") val license_name: String,
-  @field:Json(name="link") val link: String?,
-  @field:Json(name="link_to_fits") val link_to_fits: String?,
-  @field:Json(name="resource_uri") val resource_uri: String,
-  @field:Json(name="revisions") val revisions: List<String>,
-) {
-  val aspectRatio: Float get() = w.toFloat() / h.toFloat()
-}
-
-data class AstroUser(
-  @field:Json(name="id") val id: Int,
-  @field:Json(name="username") val username: String,
-  @field:Json(name="real_name") val real_name: String?,
-
-  // stats
-  @field:Json(name="followers_count") val followers_count: Int,
-  @field:Json(name="following_count") val following_count: Int,
-  @field:Json(name="post_count") val post_count: Int,
-  @field:Json(name="received_likes_count") val received_likes_count: Int,
-  @field:Json(name="image_count") val image_count: Int,
-
-  // bio
-  @field:Json(name="about") val about: String?,
-  @field:Json(name="hobbies") val hobbies: String?,
-  @field:Json(name="website") val website: String?,
-  @field:Json(name="job") val job: String?,
-
-  @field:Json(name="date_joined") val date_joined: String,
-  @field:Json(name="language") val language: String,
-  @field:Json(name="avatar") val avatar: String?,
-  @field:Json(name="resource_uri") val resource_uri: String,
-) {
-  val display_name: String get() = real_name ?: "@$username"
-  val url_avatar: String get() {
-    // since we are faking some avatar data temporarily, i am special casing my avatar for demo purposes
-    if (id == 93620) return "https://cdn.astrobin.com/images/avatars/2/7/93669/resized/194/65616d9d63bbe81142157196d34396f4.png"
-    return avatar ?: avatarUrl(username)
-  }
-}
-
-fun avatarUrl(username: String): String {
-  return "https://i.pravatar.cc/300?u=$username"
-}
-
-data class AstroResultsMeta(
-  @field:Json(name="limit") val limit: Int,
-  @field:Json(name="next") val next: String?,
-  @field:Json(name="offset") val offset: Int,
-  @field:Json(name="previous") val previous: String?,
-  @field:Json(name="total_count") val total_count: Int,
-)

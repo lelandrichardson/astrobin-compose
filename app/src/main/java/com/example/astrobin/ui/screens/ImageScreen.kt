@@ -25,11 +25,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.astrobin.api.AstroImage
-import com.example.astrobin.api.AstroUser
+import com.example.astrobin.api.AstroUserProfile
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.ui.components.*
 import com.google.accompanist.flowlayout.FlowRow
@@ -43,12 +42,12 @@ fun ImageScreen(
 ) {
   val api = LocalAstrobinApi.current
   val data = produceState<AstroImage?>(null) {
-    value = api.image(hash)
+    value = api.imageOld(hash)
   }.value
-  val user = produceState<AstroUser?>(initialValue = null, data?.user) {
+  val user = produceState<AstroUserProfile?>(initialValue = null, data?.user) {
     val username = data?.user
     if (username != null) {
-      value = api.user(username).objects.firstOrNull()
+      value = api.userProfile(username).objects.firstOrNull()
     }
   }.value
 
@@ -156,7 +155,7 @@ fun ImageScreen(
       }
 
       item {
-        Section("Subjects") {
+        Section("What is this") {
           FlowRow(mainAxisSpacing = 10.dp, crossAxisSpacing = 4.dp) {
             for (subject in data.subjects)
               Chip(subject, onClick = { nav.navigate("search?q=${subject.urlEncode()}")})
