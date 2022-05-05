@@ -15,7 +15,10 @@ data class AstroUser(
   @field:Json(name="is_active") val is_active: Boolean,
 //  @field:Json(name="groups") val groups: AuthGroupInterface[],
 //  @field:Json(name="userPermissions") val userPermissions: PermissionInterface[],
-)
+) {
+  val displayName: String
+    get() = username // TODO: ask salvatore about adding full name or display name
+}
 
 data class AstroUserProfile(
   @field:Json(name="id") val id: Int,

@@ -121,7 +121,22 @@ data class AstroImageV2(
 
   // Ephemeral form fields
 //  showGuidingEquipment?: boolean;
-)
+) {
+  private fun urlFor(alias: String) = thumbnails.single { it.alias == alias }.url
+  val url_story: String get() = urlFor("story")
+  val url_regular: String get() = urlFor("regular")
+  val url_hd: String get() = urlFor("hd")
+  val url_qhd: String get() = urlFor("qhd")
+
+  val url_histogram: String get() = imageUrl(hash,"histogram")
+
+  val aspectRatio: Float get() = w.toFloat() / h.toFloat()
+
+  val bookmarksCount: Int
+    get() = 6 // TODO: ask about including this in the API
+  val likesCount: Int
+    get() = 126 // TODO: ask about including this in the API
+}
 
 data class AstroImageRevision(
   val id: Int,

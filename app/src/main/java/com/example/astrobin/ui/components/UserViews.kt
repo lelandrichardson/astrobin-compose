@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.astrobin.api.AstroUser
 import com.example.astrobin.api.AstroUserProfile
 import com.example.astrobin.api.avatarUrl
 import com.example.astrobin.ui.screens.IconCount

@@ -11,6 +11,9 @@ class Astrobin(
   private val auth: AuthenticationInterceptor,
   private val api: AstrobinApi,
 ) {
+  class NotFoundException : Exception()
+  private fun NotFound(): Nothing { throw NotFoundException() }
+
   fun isLoggedIn(): Boolean = auth.isLoggedIn()
 
   fun logout(): Unit = auth.clear()
@@ -28,7 +31,11 @@ class Astrobin(
 
   suspend fun currentUser(): AstroUserProfile? = if (isLoggedIn()) api.currentUser().singleOrNull() else null
 
-  suspend fun image(hash: String): Paginated<AstroImageV2> = api.image(hash)
+  suspend fun image(hash: String): AstroImageV2 {
+    val pages = api.image(hash)
+    if (pages.results.isEmpty()) NotFound()
+    return pages.results.single()
+  }
 
   suspend fun image(id: Int): AstroImageV2 = api.image(id)
 
@@ -39,7 +46,11 @@ class Astrobin(
   suspend fun comments(
     contentType: Int,
     objectId: Int,
-  ): List<AstroComment> = api.comments(contentType, objectId)
+  ): List<AstroComment> {
+    return AstroComment
+      .collect(api.comments(contentType, objectId))
+      .deepFlattenInto(mutableListOf()) { it.children }
+  }
 
   suspend fun createComment(
     comment: AstroComment,
@@ -48,7 +59,7 @@ class Astrobin(
   suspend fun plateSolve(
     contentType: Int,
     objectId: Int
-  ): List<PlateSolve> = api.plateSolve(contentType, objectId)
+  ): PlateSolve? = api.plateSolve(contentType, objectId).singleOrNull()
 
   suspend fun plateSolves(
     contentType: Int,

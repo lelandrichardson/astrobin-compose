@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -27,12 +28,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.astrobin.api.AstroImage
-import com.example.astrobin.api.AstroUserProfile
-import com.example.astrobin.api.LocalAstrobinApi
+import com.example.astrobin.api.*
+import com.example.astrobin.exp.load
 import com.example.astrobin.ui.components.*
 import com.google.accompanist.flowlayout.FlowRow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import java.net.URLEncoder
+import java.time.OffsetDateTime
+
+data class ImageModel(
+  val image: AstroImageV2? = null,
+  val author: AstroUserProfile? = null,
+  val plateSolve: PlateSolve? = null,
+  val comments: List<AstroComment>? = null,
+  val commentAuthors: Map<Int, AstroUser> = emptyMap(),
+) {
+  companion object {
+    val Empty = ImageModel()
+  }
+}
 
 @Composable
 fun ImageScreen(
@@ -41,32 +58,64 @@ fun ImageScreen(
   nav: NavController
 ) {
   val api = LocalAstrobinApi.current
-  val data = produceState<AstroImage?>(null) {
-    value = api.imageOld(hash)
-  }.value
-  val user = produceState<AstroUserProfile?>(initialValue = null, data?.user) {
-    val username = data?.user
-    if (username != null) {
-      value = api.userProfile(username).objects.firstOrNull()
+  val (model, loading) = load(ImageModel.Empty) {
+    val image = api.image(hash)
+    push { it.copy(image = image) }
+    launch {
+      val author = api.user(image.user)
+      val profileId = author.userprofile ?: return@launch
+      val authorProfile = api.userProfile(profileId)
+      push { it.copy(author = authorProfile) }
     }
-  }.value
+    launch {
+      val plateSolve = api.plateSolve(19, image.pk)
+      push { it.copy(plateSolve = plateSolve) }
+    }
+    launch {
+      val comments = api.comments(19, image.pk)
+      push { it.copy(comments = comments) }
 
+      val commentAuthors = comments.map { it.author }.distinct().asFlow().map {
+        api.user(it)
+      }.toList().associateBy { it.id }
+
+      push { it.copy(commentAuthors = commentAuthors) }
+    }
+  }
+  ImageScreen(
+    loading,
+    model.image,
+    model.author,
+    model.plateSolve,
+    model.comments,
+    model.commentAuthors,
+    padding,
+    nav
+  )
+}
+
+@Composable fun ImageScreen(
+  loading: Boolean,
+  image: AstroImageV2?,
+  author: AstroUserProfile?,
+  plateSolve: PlateSolve?,
+  comments: List<AstroComment>?,
+  commentAuthors: Map<Int, AstroUser>,
+  padding: PaddingValues,
+  nav: NavController,
+) {
   var annotations by remember { mutableStateOf(false) }
 
   LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
-    if (data == null) {
+    if (image != null) {
       item {
-        LoadingIndicator(modifier = Modifier.fillParentMaxSize())
-      }
-    } else {
-      item {
-        val regularPainter = rememberImagePainter(data.url_regular)
-        val annotatedPainter = rememberImagePainter(data.url_solution)
+        val regularPainter = rememberImagePainter(image.url_regular)
+        val annotatedPainter = rememberImagePainter(plateSolve?.image_file)
         Box {
           Image(
             modifier = Modifier
               .fillMaxWidth()
-              .aspectRatio(data.aspectRatio),
+              .aspectRatio(image.aspectRatio),
             painter = regularPainter,
             contentDescription = "Full Image",
           )
@@ -74,7 +123,7 @@ fun ImageScreen(
             Image(
               modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(data.aspectRatio),
+                .aspectRatio(image.aspectRatio),
               painter = annotatedPainter,
               contentDescription = "Full Image",
             )
@@ -83,19 +132,20 @@ fun ImageScreen(
       }
 
       item {
-        Row(Modifier
-          .background(Color.Black)
-          .fillMaxWidth()
-          .padding(horizontal = 16.dp, vertical = 8.dp),
+        Row(
+          Modifier
+            .background(Color.Black)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           AstroButton(
             icon = Icons.Filled.Fullscreen,
             onClick = {
-              val hd = data.url_hd.urlEncode()
-              val solution = data.url_solution?.urlEncode() ?: ""
-              val w = data.w.toString()
-              val h = data.h.toString()
+              val hd = image.url_hd.urlEncode()
+              val solution = plateSolve?.image_file?.urlEncode() ?: ""
+              val w = image.w.toString()
+              val h = image.h.toString()
               nav.navigate(
                 "fullscreen?hd=$hd&solution=$solution&w=$w&h=$h"
               )
@@ -113,14 +163,14 @@ fun ImageScreen(
 
           CountButton(
             icon = Icons.Outlined.BookmarkBorder,
-            label = data.bookmarks.toString(),
+            label = image.bookmarksCount.toString(),
             selected = false,
             onClick = {},
           )
 
           CountButton(
             icon = Icons.Outlined.ThumbUp,
-            label = data.likes.toString(),
+            label = image.likesCount.toString(),
             selected = false,
             onClick = {},
           )
@@ -129,14 +179,14 @@ fun ImageScreen(
 
       item {
         Column(Modifier.padding(horizontal = 10.dp)) {
-          Text(data.title ?: "", style = MaterialTheme.typography.h1)
-          if (user != null) {
+          Text(image.title ?: "", style = MaterialTheme.typography.h1)
+          if (author != null) {
             Row(
               Modifier.fillMaxWidth(),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-              UserRow(user, nav)
+              UserRow(author, nav)
               AstroButton2(
                 icon = Icons.Outlined.PersonAdd,
                 label = "Follow",
@@ -154,35 +204,49 @@ fun ImageScreen(
         }
       }
 
-      item {
-        Section("What is this") {
-          FlowRow(mainAxisSpacing = 10.dp, crossAxisSpacing = 4.dp) {
-            for (subject in data.subjects)
-              Chip(subject, onClick = { nav.navigate("search?q=${subject.urlEncode()}")})
+      if (plateSolve != null) {
+        item {
+          Section("What is this") {
+            FlowRow(mainAxisSpacing = 10.dp, crossAxisSpacing = 4.dp) {
+              for (subject in plateSolve.objects_in_field.split(","))
+                Chip(subject.trim(), onClick = { nav.navigate("search?q=${subject.trim().urlEncode()}")})
+            }
           }
         }
-      }
 
-      item {
-        Section("Technical Card") {
-          TechCardItem("Declination", data.dec)
-          TechCardItem("Right Ascension", data.ra)
-          TechCardItem("Data Source", data.data_source)
-          TechCardItem("Resolution", "${data.w}px x ${data.h}px")
-          TechCardItem("Pixel Scale", "${data.pixscale} arc-sec/px")
-          TechCardItem("Imaging Camera(s)", data.imaging_cameras.joinToString(", "))
-          TechCardItem("Imaging Telescope(s)", data.imaging_telescopes.joinToString(", "))
+        if (image.description != null) {
+          item {
+            Section("Description") {
+              Text(image.description)
+            }
+          }
         }
-      }
 
-      if (data.url_skyplot != null) {
+        item {
+          Section("Technical Card") {
+            TechCardItem("Declination", plateSolve.dec)
+            TechCardItem("Right Ascension", plateSolve.ra)
+            TechCardItem("Data Source", image.dataSource)
+            TechCardItem("Resolution", "${image.w}px x ${image.h}px")
+            TechCardItem("Pixel Scale", "${plateSolve.pixscale} arc-sec/px")
+            TechCardItem("Imaging Camera(s)", image
+              .imagingCameras
+              .joinToString(", ") { "${it.make} ${it.name}" }
+            )
+            TechCardItem("Imaging Telescope(s)", image
+              .imagingTelescopes
+              .joinToString(", ") { "${it.make} ${it.name}" }
+            )
+          }
+        }
+
         item {
           Section("Sky Plot") {
             Image(
               modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f),
-              painter = rememberImagePainter(data.url_skyplot),
+              painter = rememberImagePainter(plateSolve.skyplot_zoom1),
               contentScale = ContentScale.FillWidth,
               contentDescription = "Sky Plot",
             )
@@ -196,14 +260,44 @@ fun ImageScreen(
             modifier = Modifier
               .fillMaxWidth()
               .aspectRatio(274f / 120f),
-            painter = rememberImagePainter(data.url_histogram),
+            painter = rememberImagePainter(image.url_histogram),
             contentScale = ContentScale.FillWidth,
             contentDescription = "Histogram",
           )
         }
       }
+      if (comments != null) {
+        item {
+          Section("Comments") {}
+        }
+        items(comments, key = {it.id }) {
+          CommentRow(it, commentAuthors[it.author])
+        }
+      }
     }
   }
+  if (loading) {
+    LoadingBar(modifier = Modifier.fillMaxWidth())
+  }
+}
+
+@Composable fun CommentRow(comment: AstroComment, author: AstroUser?) {
+  Row(Modifier.padding(start=50.dp * (comment.depth-1))) {
+    AstroAvatar(imageUrl = comment.author_avatar)
+    Column(Modifier.padding(start=8.dp)) {
+      Row {
+        Text(author?.username ?: "...", fontWeight = FontWeight.Bold)
+        Text(timeAgo(comment.created), color=Color.Gray, modifier = Modifier.padding(start = 8.dp))
+      }
+      Text(comment.text, modifier=Modifier.padding(vertical=4.dp))
+    }
+  }
+}
+
+
+fun timeAgo(isoDate: String): String {
+  return "5 days ago"
+//  return OffsetDateTime.parse(isoDate).
 }
 
 @Composable fun IconCount(

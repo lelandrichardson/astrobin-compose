@@ -18,4 +18,34 @@ data class AstroComment(
   @field:Json(name="moderator") val moderator: Int?,
   @field:Json(name="likes") val likes: List<Int>?,
   @field:Json(name="depth") val depth: Int,
-)
+) {
+  private val mutableChildren = mutableListOf<AstroComment>()
+  val children: List<AstroComment> get() = mutableChildren
+
+  companion object {
+    fun collect(comments: List<AstroComment>): List<AstroComment> {
+      if (comments.isEmpty()) return comments
+      val commentById = comments.associateBy { it.id }
+      val result = mutableListOf<AstroComment>()
+
+      // !assumes comments are sorted by creation date
+      for (comment in comments) {
+        if (comment.parent == null) {
+          result.add(comment)
+        } else {
+          commentById[comment.parent]!!.mutableChildren.add(comment)
+        }
+      }
+
+      return result
+    }
+  }
+}
+
+fun <T> List<T>.deepFlattenInto(target: MutableList<T>, fn: (T) -> List<T>): List<T> {
+  forEach {
+    target.add(it)
+    fn(it).deepFlattenInto(target, fn)
+  }
+  return target
+}
