@@ -1,15 +1,15 @@
 package com.example.astrobin.ui.components
 
-import android.graphics.Paint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,8 +24,8 @@ import com.example.astrobin.ui.theme.Yellow
 fun AstroButton(
   icon: ImageVector,
   onClick: () -> Unit,
-  selected: Boolean = false,
   modifier: Modifier = Modifier,
+  selected: Boolean = false
 ) {
   val color = if (selected) Yellow else Color.Transparent
   val contentColor = if (selected) DarkBlue else Color.White
@@ -52,8 +52,8 @@ fun AstroButton2(
   icon: ImageVector,
   label: String,
   onClick: () -> Unit,
-  selected: Boolean = false,
   modifier: Modifier = Modifier,
+  selected: Boolean = false
 ) {
   val color = if (selected) Yellow else Color.Transparent
   val contentColor = if (selected) DarkBlue else Yellow
@@ -81,14 +81,13 @@ fun AstroButton2(
   }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CountButton(
   icon: ImageVector,
   label: String,
   onClick: () -> Unit,
-  selected: Boolean = false,
   modifier: Modifier = Modifier,
+  selected: Boolean = false
 ) {
   val color = if (selected) Yellow else Color.White
   Row(
