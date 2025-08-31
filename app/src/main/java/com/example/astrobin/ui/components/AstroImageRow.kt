@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,8 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.astrobin.api.AstroImage
-import com.example.astrobin.api.LocalAstrobinApi
-import com.example.astrobin.api.TopPick
+import com.example.astrobin.api.TopPickV2
 
 
 private val imageForegroundGradient = Brush.linearGradient(
@@ -75,31 +73,26 @@ fun AstroImageWithContent(
 }
 
 @Composable
-fun TopPickRow(image: TopPick, nav: NavController) {
-  val api = LocalAstrobinApi.current
-  val fullImage = produceState<AstroImage?>(null) {
-    value = api.imageOld(image.hash)
-  }.value
+fun TopPickRow(topPick: TopPickV2, nav: NavController) {
+  val image = topPick.image
   AstroImageWithContent(
     modifier = Modifier.padding(horizontal = 16.dp),
     imageUrl = image.url_regular,
     onClick = { nav.navigate("image/${image.hash}")}
   ) {
-    if (fullImage != null) {
-      Text(
-        fullImage.title ?: "",
-        style = MaterialTheme.typography.h1,
-        maxLines = 1,
-        fontSize = 18.sp,
-        modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
-      )
-      SmallUserRow(
-        user = fullImage.user,
-        likeCount = fullImage.likes,
-        views = fullImage.views,
-        modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
-      )
-    }
+    Text(
+      image.title ?: "",
+      style = MaterialTheme.typography.h1,
+      maxLines = 1,
+      fontSize = 18.sp,
+      modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
+    )
+    SmallUserRow(
+      user = image.username,
+      likeCount = image.likeCount,
+      views = image.viewCount,
+      modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
+    )
   }
 }
 

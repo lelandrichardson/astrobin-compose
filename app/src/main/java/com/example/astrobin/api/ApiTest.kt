@@ -54,8 +54,8 @@ data class ImageModel(
     val image = api.image(imageHash)
     push { it.copy(image = image) }
     launch {
-      val author = api.user(image.user) // -> userprofile?
-      push { it.copy(author = author) }
+//      val author = api.user(image.user) // -> userprofile?
+//      push { it.copy(author = author) }
     }
     launch {
       val plateSolve = api.plateSolve(19, image.pk)
@@ -77,8 +77,8 @@ data class ImageModel(
     val image = api.image(imageHash)
     send { it.copy(image = image) }
     launch {
-      val author = api.user(image.user) // -> userprofile?
-      send { it.copy(author = author) }
+//      val author = api.user(image.user) // -> userprofile?
+//      send { it.copy(author = author) }
     }
     launch {
       val plateSolve = api.plateSolve(19, image.pk)

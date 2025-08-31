@@ -64,14 +64,51 @@ data class AstroImage(
   val aspectRatio: Float get() = w.toFloat() / h.toFloat()
 }
 
-data class AstroImageV2(
+data class AstroImageSummary(
   @field:Json(name="pk") val pk: Int,
-  @field:Json(name="user") val user: Int,
   @field:Json(name="hash") val hash: String,
   @field:Json(name="title") val title: String,
   @field:Json(name="imageFile") val imageFile: String?,
+  @field:Json(name="username") val username: String,
+  @field:Json(name="userDisplayName") val userDisplayName: String,
   @field:Json(name="isWip") val isWip: Boolean,
-  @field:Json(name="skipNotifications") val skipNotifications: Boolean,
+  @field:Json(name="bookmarkCount") val bookmarkCount: Int,
+  @field:Json(name="viewCount") val viewCount: Int,
+  @field:Json(name="likeCount") val likeCount: Int,
+  @field:Json(name="commentCount") val commentCount: Int,
+  @field:Json(name="w") val w: Int,
+  @field:Json(name="h") val h: Int,
+  @field:Json(name="published") val published: String,
+  @field:Json(name="thumbnails") val thumbnails: List<AstroThumbnail>,
+  @field:Json(name="isIotd") val isIotd: Boolean,
+  @field:Json(name="isTopPick") val isTopPick: Boolean,
+  @field:Json(name="isTopPickNomination") val isTopPickNomination: Boolean,
+  // Ephemeral form fields
+//  showGuidingEquipment?: boolean;
+) {
+  private fun urlFor(alias: String) = thumbnails.single { it.alias == alias }.url
+  val url_story: String get() = urlFor("story")
+  val url_regular: String get() = urlFor("regular")
+  val url_hd: String get() = urlFor("hd")
+  val url_qhd: String get() = urlFor("qhd")
+
+  val url_histogram: String get() = imageUrl(hash,"histogram")
+
+  val aspectRatio: Float get() = w.toFloat() / h.toFloat()
+}
+
+data class AstroImageV2(
+  @field:Json(name="pk") val pk: Int,
+//  @field:Json(name="user") val user: Int,
+  @field:Json(name="hash") val hash: String,
+  @field:Json(name="title") val title: String,
+  @field:Json(name="imageFile") val imageFile: String?,
+  @field:Json(name="username") val username: String,
+  @field:Json(name="userDisplayName") val userDisplayName: String,
+  @field:Json(name="isWip") val isWip: Boolean,
+  @field:Json(name="viewCount") val viewCount: Int,
+  @field:Json(name="likeCOunt") val likeCount: Int,
+//  @field:Json(name="skipNotifications") val skipNotifications: Boolean,
   @field:Json(name="w") val w: Int,
   @field:Json(name="h") val h: Int,
   @field:Json(name="imagingTelescopes") val imagingTelescopes: List<AstroProduct>,
@@ -134,8 +171,6 @@ data class AstroImageV2(
 
   val bookmarksCount: Int
     get() = 6 // TODO: ask about including this in the API
-  val likesCount: Int
-    get() = 126 // TODO: ask about including this in the API
 }
 
 data class AstroImageRevision(
@@ -154,6 +189,12 @@ data class TopPick(
   val url_gallery: String get() = imageUrl(hash, "gallery")
   val url_hd: String get() = imageUrl(hash, "hd")
 }
+
+data class TopPickV2(
+  @field:Json(name="id") val id: Int,
+  @field:Json(name="created") val created: String,
+  @field:Json(name="image") val image: AstroImageSummary,
+)
 
 data class AstroProduct(
   @field:Json(name="pk") val pk: Int,

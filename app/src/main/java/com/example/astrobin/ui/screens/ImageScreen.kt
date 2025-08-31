@@ -62,10 +62,10 @@ fun ImageScreen(
     val image = api.image(hash)
     push { it.copy(image = image) }
     launch {
-      val author = api.user(image.user)
-      val profileId = author.userprofile ?: return@launch
-      val authorProfile = api.userProfile(profileId)
-      push { it.copy(author = authorProfile) }
+//      val author = api.user(image.user)
+//      val profileId = author.userprofile ?: return@launch
+//      val authorProfile = api.userProfile(profileId)
+//      push { it.copy(author = authorProfile) }
     }
     launch {
       val plateSolve = api.plateSolve(19, image.pk)
@@ -170,7 +170,7 @@ fun ImageScreen(
 
           CountButton(
             icon = Icons.Outlined.ThumbUp,
-            label = image.likesCount.toString(),
+            label = image.likeCount.toString(),
             selected = false,
             onClick = {},
           )

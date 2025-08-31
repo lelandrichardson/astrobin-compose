@@ -35,7 +35,7 @@ fun TopScreen(
   nav: NavController
 ) {
   val api = LocalAstrobinApi.current
-  val pager = remember { Pager(PagingConfig(pageSize = 20)) { TopPickPagingSource(api) } }
+  val pager = remember { Pager(PagingConfig(pageSize = 20)) { TopPickV2PagingSource(api) } }
   val topPicks = pager.flow.collectAsLazyPagingItems()
   val loadState = topPicks.loadState
   LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {

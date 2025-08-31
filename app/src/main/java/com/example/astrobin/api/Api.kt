@@ -87,6 +87,10 @@ class Astrobin(
     offset: Int,
   ): ListResponse<TopPick> = api.topPicks(limit, offset)
 
+  suspend fun topPicksV2(
+    page: Int,
+  ): Paginated<TopPickV2> = api.topPicksV2(page)
+
   suspend fun topPickNominations(
     limit: Int,
     offset: Int,
@@ -167,6 +171,11 @@ interface AstrobinApi {
     @Query("limit") limit: Int,
     @Query("offset") offset: Int,
   ): ListResponse<TopPick>
+
+  @GET("api/v2/iotd/top-pick-archive")
+  suspend fun topPicksV2(
+    @Query("page") limit: Int,
+  ): Paginated<TopPickV2>
 
   @GET("api/v1/toppicknominations/")
   suspend fun topPickNominations(
