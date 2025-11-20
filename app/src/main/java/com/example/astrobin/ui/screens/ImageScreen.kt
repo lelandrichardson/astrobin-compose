@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
@@ -27,11 +28,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.astrobin.api.*
 import com.example.astrobin.exp.load
 import com.example.astrobin.ui.components.*
-import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -109,8 +109,8 @@ fun ImageScreen(
   LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
     if (image != null) {
       item {
-        val regularPainter = rememberImagePainter(image.url_regular)
-        val annotatedPainter = rememberImagePainter(plateSolve?.image_file)
+        val regularPainter = rememberAsyncImagePainter(image.url_regular)
+        val annotatedPainter = rememberAsyncImagePainter(plateSolve?.image_file)
         Box {
           Image(
             modifier = Modifier
@@ -207,7 +207,10 @@ fun ImageScreen(
       if (plateSolve != null) {
         item {
           Section("What is this") {
-            FlowRow(mainAxisSpacing = 10.dp, crossAxisSpacing = 4.dp) {
+            FlowRow(
+              horizontalArrangement = Arrangement.spacedBy(10.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
               for (subject in plateSolve.objects_in_field.split(","))
                 Chip(subject.trim(), onClick = { nav.navigate("search?q=${subject.trim().urlEncode()}")})
             }
@@ -246,7 +249,7 @@ fun ImageScreen(
               modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f),
-              painter = rememberImagePainter(plateSolve.skyplot_zoom1),
+              painter = rememberAsyncImagePainter(plateSolve.skyplot_zoom1),
               contentScale = ContentScale.FillWidth,
               contentDescription = "Sky Plot",
             )
@@ -260,7 +263,7 @@ fun ImageScreen(
             modifier = Modifier
               .fillMaxWidth()
               .aspectRatio(274f / 120f),
-            painter = rememberImagePainter(image.url_histogram),
+            painter = rememberAsyncImagePainter(image.url_histogram),
             contentScale = ContentScale.FillWidth,
             contentDescription = "Histogram",
           )

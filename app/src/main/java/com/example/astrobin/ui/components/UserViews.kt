@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.astrobin.api.AstroUser
 import com.example.astrobin.api.AstroUserProfile
 import com.example.astrobin.api.avatarUrl
@@ -81,7 +81,7 @@ fun SmallUserRow(
   imageUrl: String
 ) {
   Image(
-    painter = rememberImagePainter(imageUrl),
+    painter = rememberAsyncImagePainter(imageUrl),
     contentDescription = "",
     modifier = Modifier
       .border(2.dp, Yellow, CircleShape)

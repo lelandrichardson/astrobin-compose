@@ -21,8 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import coil.compose.rememberImagePainter
-import com.google.accompanist.insets.statusBarsPadding
+import coil.compose.rememberAsyncImagePainter
 import com.example.astrobin.api.*
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items

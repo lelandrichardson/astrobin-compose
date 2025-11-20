@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.TopPickV2
 
@@ -46,7 +46,7 @@ fun AstroImage(
   modifier: Modifier = Modifier,
 ) {
   Image(
-    painter = rememberImagePainter(imageUrl),
+    painter = rememberAsyncImagePainter(imageUrl),
     contentDescription = "",
     contentScale = ContentScale.FillWidth,
     // Bug here if I don't specify a size, I want fillWidth(). :(

@@ -26,13 +26,12 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.astrobin.api.AstroUserProfile
 import com.example.astrobin.api.ImageSearchPagingSource
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.ui.components.LoadingIndicator
 import com.example.astrobin.ui.components.UserImageRow
-import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun UserScreen(
@@ -104,7 +103,7 @@ private fun UserHeaderContent(user: AstroUserProfile, nav: NavController) {
   ) {
     Spacer(modifier = Modifier.height(16.dp))
     Image(
-      painter = rememberImagePainter(user.url_avatar),
+      painter = rememberAsyncImagePainter(user.url_avatar),
       contentDescription = "avatar",
       contentScale = ContentScale.Crop,
       modifier = Modifier
