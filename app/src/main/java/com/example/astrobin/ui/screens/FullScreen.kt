@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.astrobin.ui.components.*
 
 @Composable
@@ -59,7 +59,7 @@ fun FullScreen(
       }
       .background(Color.Black)
   ) {
-    val regularPainter = rememberImagePainter(hd)
+    val regularPainter = rememberAsyncImagePainter(hd)
     Image(
       modifier = Modifier
         .fillMaxWidth()
@@ -70,7 +70,7 @@ fun FullScreen(
       contentDescription = "Full Image",
     )
     if (solution != null) {
-      val annotatedPainter = rememberImagePainter(solution)
+      val annotatedPainter = rememberAsyncImagePainter(solution)
       if (annotations) {
         Image(
           modifier = Modifier

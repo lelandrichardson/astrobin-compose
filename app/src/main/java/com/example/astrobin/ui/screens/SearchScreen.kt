@@ -27,14 +27,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.astrobin.api.AstroImage
 import com.example.astrobin.api.ImageSearchPagingSource
 import com.example.astrobin.api.LocalAstrobinApi
 import com.example.astrobin.ui.components.ImageRow
 import com.example.astrobin.ui.components.LoadingIndicator
 import com.example.astrobin.ui.components.SearchBox
-import com.google.accompanist.insets.statusBarsPadding
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
