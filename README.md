@@ -17,3 +17,7 @@ ASTROBIN_API_SECRET=<secret>
 ```
 
 And then you should be good to go!
+
+---
+
+*Why did the astronomer break up with the sun? Because it was too hot to handle and kept throwing shade!* 🌞
